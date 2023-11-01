@@ -177,6 +177,13 @@ def checaSeData(entrada):
     return True
 
 def checaSeCPF(entrada):
+    """
+    Função que checa se uma entrada é um CPF válido
+    Args:
+        entrada: Entrada a ser checada
+    Returns:
+        Boolean: Verdadeiro se for um CPF válido e Falso senão
+    """
     if not(entrada.isdigit()):
         return False
     
@@ -187,4 +194,17 @@ def checaSeCPF(entrada):
         return False
     
     return True
+
+import ast
+
+def avaliaExpressaoBooleana(expression):
+    """
+    Função que avalia se uma entrada é uma expressão booleana válida
+    """
+    try:
+        # Parse a Python expression and evaluate it as a boolean
+        return bool(ast.literal_eval(expression))
+    except (SyntaxError, ValueError):
+        return False  # Expression is not valid
+
     

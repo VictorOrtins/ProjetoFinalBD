@@ -194,7 +194,7 @@ def menuInformacoesUsuario():
 
     elif tipoUsuario == TipoUsuario.FUNCIONARIO:
         listaFuncoes = [exibirInformacoesUsuario, alugueisConfirmacao, menuLoja, sairConta]
-        txtInput = "".join([f"{textoCor("Cliente: ", Texto.magenta())}{usuario.nome}\n\n",f"{textoCor("1 - ", Texto.azul())}Exibir Informações do Funcionário\n\n",
+        txtInput = "".join([f"{textoCor("Funcionário: ", Texto.magenta())}{usuario.nome}\n\n",f"{textoCor("1 - ", Texto.azul())}Exibir Informações do Funcionário\n\n",
         f"{textoCor("2 - ", Texto.azul())}Aluguéis pendentes de confirmação\n\n", f"{textoCor("3 - ", Texto.azul())}Voltar para o Menu da Loja\n\n",
         f"{textoCor("4 - ", Texto.azul())}Sair da conta\n\n"])
     elif tipoUsuario == TipoUsuario.SEM_LOGIN:
@@ -229,8 +229,145 @@ def menuInformacoesUsuario():
     listaFuncoes[opcao - 1]()
 
 def menuAluguelDeFilmes():
-    print("Seção menu de aluguel de filmes não feita ainda!")
-    voltarMenuLoja()
+    global tipoUsuario
+
+    if tipoUsuario == TipoUsuario.CLIENTE:
+        listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, menuLoja]
+        txtInput = "".join([f"{textoCor("Cliente: ", Texto.verde())}{usuario.nome}\n\n",f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",
+        f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
+        f"{textoCor("4 - ", Texto.azul())}Voltar para o menu da loja\n\n"])
+    elif tipoUsuario == TipoUsuario.SEM_LOGIN:
+        listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, menuLoja]
+        txtInput = "".join([f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",
+        f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
+        f"{textoCor("4 - ", Texto.azul())}Voltar para o menu da loja\n\n"])
+
+
+    while(True):
+        teste = 4
+
+        titulo("ALUGUEL DE FILMES", Texto.negrito())
+
+        print(txtInput)
+
+        try:
+            opcao = int(input("Escolha uma opção: "))
+        except ValueError: #Trata um input não numeral
+            print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
+            loading("Recarregando", Texto.ciano())
+            continue
+        
+        
+        if opcao <= 0 or opcao > teste: #Trata um input fora das opções válidas
+            print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
+            loading("Recarregando", Texto.ciano())
+            continue
+
+        break
+
+    loading("Carregando", Texto.ciano())
+    
+    listaFuncoes[opcao - 1]()
+
+def pesquisarNome():
+    global carrinho
+
+    nomeFilme = input("Nome do Filme que você deseja pesquisar: ")
+
+    filmes = [Filme(2, "Avengers Endgame", "2019-09-05", "Herói", "Marvel", "Joe Russo", 9, 8.7),
+              Filme(1, "Revenge of The Sith", "2005-05-05", "Ficção", "Lucasfilm", "George Lucas", 10, 12),
+              ]
+
+    for filme in filmes:
+        print(filme.stringFilme())
+
+    adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+    if adicionar:
+        while(True):
+            id = input("Digite o ID do filme que deseja adicionar no carrinho: ")
+            if not(id.isdigit()):
+                print(f"{textoCor("ID inválido!", Texto.vermelho())}")
+                continue
+
+            break
+        
+        for filme in filmes:
+            if filme.id == int(id):
+                carrinho.append(DVD(filme.id, 1, filme.nome))
+                break
+        
+        loading("Carregando", Texto.ciano())
+        menuAluguelDeFilmes()
+    else:
+        loading("Carregando", Texto.ciano())
+        menuAluguelDeFilmes()
+
+def pesquisarPreco():
+    global carrinho
+
+    rangePreco = input("Expressão de preço que deseja pesquisar: (Ex: preco > 10 and preco < 20) ")
+
+    filmes = [Filme(2, "Avengers Endgame", "2019-09-05", "Herói", "Marvel", "Joe Russo", 9, 8.7),
+              Filme(1, "Revenge of The Sith", "2005-05-05", "Ficção", "Lucasfilm", "George Lucas", 10, 12),
+              ]
+
+    for filme in filmes:
+        print(filme.stringFilme())
+
+    adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+    if adicionar:
+        while(True):
+            id = input("Digite o ID do filme que deseja adicionar no carrinho: ")
+            if not(id.isdigit()):
+                print(f"{textoCor("ID inválido!", Texto.vermelho())}")
+                continue
+
+            break
+        
+        for filme in filmes:
+            if filme.id == int(id):
+                carrinho.append(DVD(filme.id, 1, filme.nome))
+                break
+        
+        loading("Carregando", Texto.ciano())
+        menuAluguelDeFilmes()
+    else:
+        loading("Carregando", Texto.ciano())
+        menuAluguelDeFilmes()
+
+def pesquisarGenero():
+    global carrinho
+
+    genero = input("Gênero do filme que desejas pesquisar: ")
+
+    filmes = [Filme(2, "Avengers Endgame", "2019-09-05", "Herói", "Marvel", "Joe Russo", 9, 8.7),
+              Filme(1, "Revenge of The Sith", "2005-05-05", "Ficção", "Lucasfilm", "George Lucas", 10, 12),
+              ]
+
+    for filme in filmes:
+        print(filme.stringFilme())
+
+    adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+    if adicionar:
+        while(True):
+            id = input("Digite o ID do filme que deseja adicionar no carrinho: ")
+            if not(id.isdigit()):
+                print(f"{textoCor("ID inválido!", Texto.vermelho())}")
+                continue
+
+            break
+        
+        for filme in filmes:
+            if filme.id == int(id):
+                carrinho.append(DVD(filme.id, 1, filme.nome))
+                break
+        
+        loading("Carregando", Texto.ciano())
+        menuAluguelDeFilmes()
+    else:
+        loading("Carregando", Texto.ciano())
+        menuAluguelDeFilmes()
+
 
 def menuCadastroEstoque():
     menuCadastro()
@@ -248,20 +385,21 @@ def verCarrinho():
         print("O carrinho está vazio!\n")
         loading("Carregando", Texto.ciano())
         menuLoja()
-
-    for item in carrinho:
-        print(item.stringDVD())
-    
-    print()
-
-    finalizar = whileOutro("Deseja finalizar a compra?(Y/N) ")
-    if finalizar:
-        loading("Carregando", Texto.ciano())
-        finalizarCompra()
     else:
-        input("Pressione qualquer tecla para voltar ao Menu da Loja ")
-        loading("Carregando", Texto.ciano())
-        menuLoja()
+        print(len(carrinho))
+        for item in carrinho:
+            print(item.stringDVD())
+        
+        print()
+
+        finalizar = whileOutro("Deseja finalizar a compra?(Y/N) ")
+        if finalizar:
+            loading("Carregando", Texto.ciano())
+            finalizarCompra()
+        else:
+            input("Pressione qualquer tecla para voltar ao Menu da Loja ")
+            loading("Carregando", Texto.ciano())
+            menuLoja()
 
 def finalizarCompra():
     global carrinho
@@ -388,6 +526,7 @@ def menuCadastro():
     """
 
     listaFuncoes = [menuInserir, menuAlterar, menuPesquisar, menuRemover, menuListar, menuExibir, menuRelatorio, menuSair]
+
     #Lista das funções que serão utilizadas. Todas elas tem assinatura parecidas para 
     #evitar o uso excessivo de ifs ou de switch cases
 
@@ -402,7 +541,7 @@ def menuCadastro():
         print(textoCor("5 - ", cor) + "Listar todos os Filmes\n")
         print(textoCor("6 - ", cor) + "Exibir um filme\n")
         print(textoCor("7 - ", cor) + "Exibir Relatório\n")
-        print(textoCor("8 - ", cor) + "Sair\n")
+        print(textoCor("8 - ", cor) + "Voltar para o Menu da Loja\n")
 
         try:
             opcao = int(input("Escolha uma opção: "))
