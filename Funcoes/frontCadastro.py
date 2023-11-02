@@ -22,7 +22,7 @@ NOME_DIRETOR = 'NomeDiretor'
 QTD_ESTOQUE = 'qtdEstoque'
 PRECO_ALUGUEL = 'precoAluguel'
 
-def menuCadastro():
+def menuCadastro(manipulaDaos):
     """
     Menu Principal da aplicação
     Args:
@@ -62,7 +62,7 @@ def menuCadastro():
         listaFuncoes[opcao - 1]
         if opcao != 8:
             loading(f"Carregando", Texto.amarelo())
-        sair = listaFuncoes[opcao - 1]() #A função sair retorna True quando chamado para fazer o controle do menu
+        sair = listaFuncoes[opcao - 1](manipulaDaos) #A função sair retorna True quando chamado para fazer o controle do menu
         #O resto das funções retorna None
 
         if sair == True: #Fim do Programa
@@ -73,14 +73,12 @@ def menuCadastro():
     
             
 #Função que controla as inserções de filmes           
-def menuInserir():
+def menuInserir(manipulaDaos):
     """
     Menu de inserção dos filmes
     Args:
         daoFilme: Objeto que implementa a interface FilmeDao
     """
-    global manipulaDaos
-
     menuInserir = True
     while(menuInserir):
         titulo("INSERÇÃO DE FILMES", Texto.negrito())
@@ -152,13 +150,12 @@ def menuInserir():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla as alterações de filmes
-def menuAlterar():
+def menuAlterar(manipulaDaos):
     """
     Menu de alteração dos filmes
     Args:
         daoFilme: Objeto que implementa a interface FilmeDao
     """
-    global daoFilme
 
     menuAlterar = True
     while(menuAlterar):
@@ -248,13 +245,12 @@ def menuAlterar():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla as pesquisas de filmes
-def menuPesquisar():
+def menuPesquisar(manipulaDaos):
     """
     Menu de Pesquisa de filmes
     Args:
         daoFilme: Objeto que implementa a interface FilmeDao
     """
-    global daoFilme
     
     menuPesquisar = True
     while(menuPesquisar):
@@ -281,13 +277,12 @@ def menuPesquisar():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla as remoções de filmes
-def menuRemover():
+def menuRemover(manipulaDaos):
     """
     Menu de remoção dos Filmes
     Args:
         daoFilme: Objeto que implementa a interface FilmeDao
     """
-    global daoFilme
 
     menuRemover = True
     while(menuRemover):
@@ -315,13 +310,12 @@ def menuRemover():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla a listagem de filmes
-def menuListar():
+def menuListar(manipulaDaos):
     """
     Menu de listagem dos Filmes
     Args:
         daoFilme: Objeto que implementa a interface FilmeDao
     """
-    global daoFilme
 
     titulo("LISTAGEM DE FILMES", Texto.negrito())
     print("Filmes cadastrados:")
@@ -340,14 +334,12 @@ def menuListar():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla a exibição de filmes
-def menuExibir():
+def menuExibir(manipulaDaos):
     """
     Menu de exibição dos Filmes
     Args:
         daoFilme: Objeto que implementa a interface FilmeDao
     """
-    global daoFilme
-
     menuExibir = True
 
     while(menuExibir):
@@ -370,7 +362,7 @@ def menuExibir():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla a exibição do relatório de informações
-def menuRelatorio():
+def menuRelatorio(manipulaDaos):
     """
     Menu que exibe o relatório do Banco de Daos
     Args:
@@ -392,7 +384,7 @@ def menuRelatorio():
     loading("Saindo", Texto.amarelo())
 
 #Função que controla a saída do menu
-def menuSair():
+def menuSair(manipulaDaos):
     
     """
     Menu de saída dos Filmes

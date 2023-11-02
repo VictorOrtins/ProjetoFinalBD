@@ -206,5 +206,20 @@ def avaliaExpressaoBooleana(expression):
         return bool(ast.literal_eval(expression))
     except (SyntaxError, ValueError):
         return False  # Expression is not valid
+    
+def inputYNtoBool(entrada):
+    while(True):
+        boolInput = input(entrada)
+        if boolInput.upper() == "Y":
+            boolInput = True
+            break
+        elif boolInput.upper() == "N":
+            boolInput = False
+            break
+        
+        print(textoCor("Opção Inválida!\n", Texto.vermelho()))
+
+
+
 
     
