@@ -16,8 +16,9 @@ from Funcoes.frontCadastro import menuCadastro
 
 class TipoUsuario(Enum):
     CLIENTE = 1
-    FUNCIONARIO = 2
+    VENDEDOR = 2
     SEM_LOGIN = 3
+    GERENTE = 4
 
 manipulaDaos = ManipulaDAOs(DaoFactory())
 
@@ -38,7 +39,7 @@ def menuIniciar():
     """
     Função que serve como o menu de tentativa de login, cadastro ou entrada no sistema sem login
     """
-    listaFuncoes = [menuLogin, menuLoja, menuCadastro, sairLoja] #Lista de funções que são chamadas após a escolha do usuário
+    listaFuncoes = [menuLogin, menuLoja, cadastroCliente, sairLoja] #Lista de funções que são chamadas após a escolha do usuário
     while(True):
         titulo("ESCOLHA DE LOGIN", Texto.negrito())
 
@@ -76,36 +77,6 @@ def menuLogin():
 
         print(f"{textoCor("1 - ", Texto.azul())}Login de Cliente\n")
         print(f"{textoCor("2 - ", Texto.azul())}Login de Funcionário\n")
-        print(f"{textoCor("3 - ", Texto.azul())}Voltar\n")
-
-        try:
-            opcao = int(input("Escolha uma opção: "))
-        except ValueError: #Trata um input não numeral
-            print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
-            loading("Recarregando", Texto.ciano())
-            continue
-            
-        if opcao <= 0 or opcao > 3: #Trata um input fora das opções válidas
-            print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
-            loading("Recarregando", Texto.ciano())
-            continue
-
-        break
-
-    loading("Carregando", Texto.amarelo())
-    listaFuncoes[opcao - 1]()
-
-def menuCadastro():
-    """
-    Função que chama as funções referentes ao cadastro
-    """
-
-    listaFuncoes = [cadastroCliente, cadastroFuncionario, menuIniciar] #Funções que serão chamadas a partir da escolha do usuário
-    while(True):
-        titulo("ESCOLHA DE LOGIN", Texto.negrito())
-
-        print(f"{textoCor("1 - ", Texto.azul())}Cadastro de Cliente\n")
-        print(f"{textoCor("2 - ", Texto.azul())}Cadastro de Funcionário\n")
         print(f"{textoCor("3 - ", Texto.azul())}Voltar\n")
 
         try:
@@ -207,13 +178,18 @@ def loginFuncionario():
             continue
 
         #Cria o objeto do funcionário   
-        funcionario = Funcionario(funcionario.iloc[0,0], funcionario.iloc[0,1], funcionario.iloc[0,2], funcionario.iloc[0,3], funcionario.iloc[0,4])
+        funcionario = Funcionario(funcionario.iloc[0,0], funcionario.iloc[0,1], funcionario.iloc[0,2], funcionario.iloc[0,3], funcionario.iloc[0,4], funcionario.iloc[0,5])
 
         break
     
     if not(naoEncontrado): #Se o login foi bem sucedido
         print(textoCor("\nLogin de Funcionário bem-sucedido!", Texto.verde()))
-        tipoUsuario = TipoUsuario.FUNCIONARIO #Muda o tipo do usuário
+
+        if funcionario.tipoFuncionario == "Vendedor":
+            tipoUsuario = TipoUsuario.VENDEDOR #Muda o tipo do usuário
+        elif funcionario.tipoFuncionario == "Gerente":
+            tipoUsuario = TipoUsuario.GERENTE
+        
         usuario = funcionario #Atualiza o usuário para o funcionário
 
     loading("Carregando", Texto.amarelo())
@@ -225,7 +201,7 @@ def menuLoja():
     Esse menu muda de visualização a partir do tipo do usuário que está logando no sistema
     """
 
-    if tipoUsuario == TipoUsuario.FUNCIONARIO: #Se for um funcionário
+    if tipoUsuario == TipoUsuario.VENDEDOR: #Se for um funcionário
         listaFuncoes = [menuInformacoesUsuario, menuCadastroEstoque, sairLoja] #Define as funções
         #Texto que será exibido para o usuário digitar a opção que ele quer
         #Ele vai conter o nome do funcionário, pode redirecionar para o menu de informações de usuário,
@@ -256,8 +232,16 @@ def menuLoja():
         f"{textoCor("4 - ", Texto.azul())}Sair da Loja\n"])
 
         teste = 4 #4 opções
+    elif tipoUsuario == TipoUsuario.GERENTE:
+        listaFuncoes = [menuInformacoesUsuario, menuCadastroEstoque, menuCadastroFuncionario, sairLoja] #Define as funções
 
+        #Mesma coisa do vendedor porém com a opção de cadastrar vendedores
+        txtInput = "".join([f"{textoCor("Gerente: ", Texto.azul())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Informações do Usuário\n\n",
+        f"{textoCor("2 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("3 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("4 - ", Texto.azul())}Sair da Loja\n"])
 
+        teste = 4
+
+        
     while(True):
         #Loop do menu da loja
         titulo("MENU DA LOJA", Texto.negrito())
@@ -282,6 +266,35 @@ def menuLoja():
         loading("Carregando", Texto.ciano())
     listaFuncoes[opcao - 1]()
 
+def menuCadastroFuncionario():
+    listaFuncoes = [cadastroVendedor, demitirVendedor, mostrarFuncionarios, menuLoja]
+    teste = 4
+    while(True):
+        titulo("MENU DO CADASTRO FUNCIONÁRIO", Texto.negrito())
+
+        print(f"{textoCor("1 - ", Texto.azul())}Cadastro de Vendedor\n")
+        print(f"{textoCor("2 - ", Texto.azul())}Demitir Vendedor\n")
+        print(f"{textoCor("3 - ", Texto.azul())}Mostrar Todos os Funcionários\n")
+        print(f"{textoCor("4 - ", Texto.azul())}Voltar para Loja\n")
+
+        try:
+            opcao = int(input("Escolha uma opção: "))
+        except ValueError: #Trata um input não numeral
+            print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
+            loading("Recarregando", Texto.ciano())
+            continue
+        
+        
+        if opcao <= 0 or opcao > teste: #Trata um input fora das opções válidas
+            print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
+            loading("Recarregando", Texto.ciano())
+            continue
+
+        break
+
+    loading("Carregando", Texto.amarelo())
+    listaFuncoes[opcao - 1]() #Chamar a função da lista de funções
+
 def menuInformacoesUsuario():
     """
     Menu que redireciona para as informações do usuário
@@ -299,12 +312,18 @@ def menuInformacoesUsuario():
         f"{textoCor("2 - ", Texto.azul())}Histórico de Filmes Alugados\n\n", f"{textoCor("3 - ", Texto.azul())}Voltar para o Menu da Loja\n\n",
         f"{textoCor("4 - ", Texto.azul())}Sair da conta\n\n"])
 
-    elif tipoUsuario == TipoUsuario.FUNCIONARIO: #Se for um funcionário
+    elif tipoUsuario == TipoUsuario.VENDEDOR or tipoUsuario == TipoUsuario.GERENTE: #Se for um funcionário
         listaFuncoes = [exibirInformacoesUsuario, alugueisConfirmacao, menuLoja, sairConta] #Funções que podem ser chamadas
 
         #Pergunta se o funcioário quer ver as informações do funcionário, os aluguéis pendentes de confirmação,
         #Se quer voltar ao menu da loja ou sair da conta
-        txtInput = "".join([f"{textoCor("Funcionário: ", Texto.magenta())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Exibir Informações do Funcionário\n\n",
+
+        if tipoUsuario == TipoUsuario.GERENTE:
+            textoNome = textoCor("Gerente: ", Texto.azul())
+        elif tipoUsuario == TipoUsuario.VENDEDOR:
+            textoNome = textoCor("Vendedor: ", Texto.magenta())
+        
+        txtInput = "".join([f"{textoNome}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Exibir Informações do Funcionário\n\n",
         f"{textoCor("2 - ", Texto.azul())}Aluguéis pendentes de confirmação\n\n", f"{textoCor("3 - ", Texto.azul())}Voltar para o Menu da Loja\n\n",
         f"{textoCor("4 - ", Texto.azul())}Sair da conta\n\n"])
     elif tipoUsuario == TipoUsuario.SEM_LOGIN: #Se não for nada. Isso aqui é só um teste, pra se der algo errado
@@ -672,7 +691,7 @@ def cadastroCliente():
     global usuario
     global manipulaDaos
 
-    titulo("Cadastro de Clientes")
+    titulo("Nova Conta Cliente")
 
     #Pega as informações do cliente
     primeiroNome = checaEntrada("Primeiro Nome do Cliente: ", "Nome de Cliente inválido!", lambda x: False) #Não há nada que impeça o input de qualquer nome
@@ -697,7 +716,7 @@ def cadastroCliente():
     cliente = Cliente(-1, cpf, primeiroNome, ultimoNome, cidade, login, senha, isFlamengo, assisteOnePiece)
 
     try:
-        manipulaDaos.daoCliente.inserir(cliente) #Tenta inserir o cliente
+        idCliente = manipulaDaos.daoCliente.inserir(cliente) #Tenta inserir o cliente
     except mysql.connector.Error as err: #Se houve algum erro
         if err.errno == 1062: #Se o erro foi de inserção, ou seja, alguma constraint foi de unique ou primary key foi violada
             print(f"{textoCor("Inserção inválida! Login e/ou Nome de Cliente já existente!", Texto.vermelho())}")
@@ -714,10 +733,7 @@ def cadastroCliente():
 
         if entrar: #Se for desejado entrar com esse usuário
             
-            #Isso aqui pega o ID do cliente. Mas agora percebi que isso é melhor se for retornado no inserir
-            #Há uma função que no mysql que volta o auto incremental adicionado
-            resultado = manipulaDaos.daoCliente.pegarID(login)
-            cliente.id = resultado.iloc[0,0]
+            cliente.id = idCliente
 
             #Atualiza o usuário e o tipo do usuário
             tipoUsuario = TipoUsuario.CLIENTE
@@ -730,7 +746,7 @@ def cadastroCliente():
             menuIniciar()
         
 
-def cadastroFuncionario():
+def cadastroVendedor():
     global tipoUsuario
     global usuario
     global manipulaDaos
@@ -745,9 +761,10 @@ def cadastroFuncionario():
     print()
     senha = checaEntrada(f"Senha do usuário de login {login}: ", "Senha inválida", lambda x: False)
 
-    funcionario = Funcionario(-1,primeiroNome, segundoNome, login, senha)
+    funcionario = Funcionario(-1,primeiroNome, segundoNome, login, senha, "Vendedor")
+
     try:
-        manipulaDaos.daoFuncionario.inserir(funcionario)
+        idFuncionario = manipulaDaos.daoFuncionario.inserir(funcionario)
     except mysql.connector.Error as err:
         if err.errno == 1062:
             print(f"{textoCor("Inserção inválida! Login já existente!", Texto.vermelho())}")
@@ -758,18 +775,44 @@ def cadastroFuncionario():
 
     else:
         print(f"{textoCor("Funcionário inserido com sucesso", Texto.verde())}")
-        print()
-        inserirOutro = whileOutro("Deseja entrar com esse funcionário? (Y/N)")
+        loading("Carregando", Texto.amarelo())
+        menuCadastroFuncionario()
 
-        if inserirOutro:
-            resultado = manipulaDaos.daoFuncionario.pegarID(login)
-            funcionario.id = resultado.iloc[0,0]
+def demitirVendedor():
+    global manipulaDaos
 
-            tipoUsuario = TipoUsuario.FUNCIONARIO
-            usuario = funcionario
+    while(True):
+        titulo("DEMITIR VENDEDOR", Texto.negrito())
 
-            loading("Carregando", Texto.amarelo())
-            menuLoja()
+        idVendedor = input("Digite o ID do Vendedor que desejas demitir: ")
+
+        sucesso = manipulaDaos.daoFuncionario.demitirVendedor(idVendedor)
+        if sucesso:
+            print(f"{textoCor("Vendedor demitido com sucesso!", Texto.verde())}")
         else:
-            loading("Carregando", Texto.amarelo())
-            menuIniciar()    
+            print(f"{textoCor(f"Vendedor de ID {idVendedor} não encontrado!", Texto.vermelho())}")
+
+        sucesso = whileOutro("Deseja demitir outro vendedor? (Y/N)")
+        if sucesso:
+            loading("Recarregando", Texto.ciano())
+            continue
+        else:
+            break
+
+    loading("Carregando", Texto.amarelo())
+    menuCadastroFuncionario()
+
+def mostrarFuncionarios():
+    global manipulaDaos
+
+    titulo("Mostrar Funcionários", Texto.negrito())
+
+    funcionarios = manipulaDaos.daoFuncionario.findAll()
+
+    for _, row in funcionarios.iterrows():
+        funcionario = Funcionario(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5])
+        print(funcionario.stringFuncionario(), end="\n\n")
+
+    input("Digite qualquer tecla para voltar ao menu ")
+    loading("Saindo", Texto.amarelo())
+    menuCadastroFuncionario()

@@ -325,7 +325,7 @@ def menuListar(manipulaDaos):
     if filmes.empty : #
         print(textoCor("Não há nenhum filme cadastrado!\n\n", Texto.vermelho()))
     else:
-        for index, row in filmes.iterrows():
+        for _, row in filmes.iterrows():
             filme = Filme(row[ID], row[NOME], row[DATA_LANCAMENTO], row[GENERO], row[NOME_ESTUDIO], row[NOME_DIRETOR], row[QTD_ESTOQUE], row[PRECO_ALUGUEL])
             print(filme.stringFilme(), end="\n\n")
 
