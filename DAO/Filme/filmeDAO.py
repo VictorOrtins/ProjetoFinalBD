@@ -114,6 +114,80 @@ class filmeDAOMySQL():
 
         return resultado
 
+    
+    def findByRangePrice(self, range1, range2):
+        query = 'SELECT * FROM Filme WHERE precoAluguel BETWEEN %s AND %s ORDER BY precoAluguel ASC'
+
+        value = (range1, range2)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+            return pd.DataFrame(columns=colunas)
+        
+        resultado = pd.DataFrame(resultado, columns=colunas)
+
+        return resultado
+    
+    def findByDirector(self, diretor):
+        query = 'SELECT * FROM Filme WHERE precoAluguel BETWEEN %s AND %s ORDER BY precoAluguel ASC'
+
+        value = (diretor,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+            return pd.DataFrame(columns=colunas)
+        
+        resultado = pd.DataFrame(resultado, columns=colunas)
+
+        return resultado
+    
+    def findByRangeQtdEstoque(self, range1, range2):
+        query = 'SELECT * FROM Filme WHERE qtdEstoque BETWEEN %s AND %s ORDER BY qtdEstoque DESC'
+
+        value = (range1, range2)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+            return pd.DataFrame(columns=colunas)
+        
+        resultado = pd.DataFrame(resultado, columns=colunas)
+
+        return resultado
+    
+    def findByGenre(self, genre):
+        query = 'SELECT * FROM Filme WHERE Genero = %s'
+
+        value = (genre,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+            return pd.DataFrame(columns=colunas)
+        
+        resultado = pd.DataFrame(resultado, columns=colunas)
+
+        return resultado
+
+
     def findAll(self):
         query = 'SELECT * FROM Filme'
         self.cursor.execute(query)

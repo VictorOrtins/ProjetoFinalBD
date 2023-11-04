@@ -72,10 +72,11 @@ class ClienteDAOMySQL():
         try:
             self.cursor.execute(query, values)
             self.database.commit()
+            idCliente = self.cursor.lastrowid
         except mysql.connector.Error as err:
             raise err
 
-        return True
+        return idCliente
     
     def pegarID(self, login):
         query = f"SELECT ID From {self.tabela} WHERE Login = %s"

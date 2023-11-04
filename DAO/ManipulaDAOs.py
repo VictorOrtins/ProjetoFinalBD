@@ -6,5 +6,6 @@ class ManipulaDAOs():
         self.daoFilme = daoFactory.createFilmeDao()
         self.daoCliente = daoFactory.createClienteDao()
         self.daoFuncionario = daoFactory.createFuncionarioDao()
+        self.daoElenco = daoFactory.createElencoDao()
 
     

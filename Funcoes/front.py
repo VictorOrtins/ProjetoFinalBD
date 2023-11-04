@@ -10,8 +10,9 @@ from Entidades.cliente import *
 from Entidades.funcionario import *
 from Entidades.filme import *
 from Entidades.dvd import *
+from Entidades.filmeCarrinho import *
 
-from Funcoes.frontCadastro import menuCadastro
+from Funcoes.frontCadastroEstoque import menuCadastro
 
 
 class TipoUsuario(Enum):
@@ -25,7 +26,7 @@ manipulaDaos = ManipulaDAOs(DaoFactory())
 tipoUsuario = TipoUsuario.SEM_LOGIN
 usuario = None
 
-carrinho = [DVD(1, 6, "Avengers Endgame"), DVD(2, 5, "Barbie")]
+carrinho = []
 
 
 def iniciar():
@@ -263,7 +264,7 @@ def menuLoja():
         break
 
     if opcao != teste:
-        loading("Carregando", Texto.ciano())
+        loading("Carregando", Texto.amarelo())
     listaFuncoes[opcao - 1]()
 
 def menuCadastroFuncionario():
@@ -353,7 +354,7 @@ def menuInformacoesUsuario():
         break
 
     if opcao != 4: #Se o usuário não escolher sair
-        loading("Carregando", Texto.ciano())
+        loading("Carregando", Texto.amarelo())
     
     listaFuncoes[opcao - 1]() #Chamar a função da lista de funções
 
@@ -368,20 +369,14 @@ def menuAluguelDeFilmes():
     #Por enquanto está igual, mas acho que eu pensei em algo que fosse diferenciar os 2. Acho que seria o fato do usuário sem login
     #Não poder fazer a compra sem digitar as informações
 
-    if tipoUsuario == TipoUsuario.CLIENTE: #Se for um cliente
-        listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, menuLoja] #Funções
-        txtInput = "".join([f"{textoCor("Cliente: ", Texto.verde())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
-        f"{textoCor("4 - ", Texto.azul())}Voltar para o menu da loja\n\n"])
-    elif tipoUsuario == TipoUsuario.SEM_LOGIN: #Se for um funcionário
-        listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, menuLoja]
-        txtInput = "".join([f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
-        f"{textoCor("4 - ", Texto.azul())}Voltar para o menu da loja\n\n"])
+    listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, pesquisarFilmeAtor, pesquisarFilmeNacionalidade, pesquisarFilmeDiretor, menuLoja] #Funções
+    txtInput = "".join([f"{textoCor("Cliente: ", Texto.verde())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",
+    f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
+    f"{textoCor("4 - ", Texto.azul())}Pesquisar por Filmes do Ator\n\n", f"{textoCor("5 - ", Texto.azul())}Pesquisar por Filmes do Ator que nasceu em\n\n",
+    f"{textoCor("6 - ", Texto.azul())}Pesquisar por Filmes do Diretor\n\n", f"{textoCor("7 - ", Texto.azul())}Voltar para o menu da loja\n\n"])
     #O funcionário não pode ir para o menu de aluguel de filmes, para que não tenha chance dele poder alugar um filme
 
     while(True):
-        teste = 4 #4 opções
 
         titulo("ALUGUEL DE FILMES", Texto.negrito())
 
@@ -395,54 +390,62 @@ def menuAluguelDeFilmes():
             continue
         
         
-        if opcao <= 0 or opcao > teste: #Trata um input fora das opções válidas
+        if opcao <= 0 or opcao > len(listaFuncoes): #Trata um input fora das opções válidas
             print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
             loading("Recarregando", Texto.ciano())
             continue
 
         break
 
-    loading("Carregando", Texto.ciano())
+    loading("Carregando", Texto.amarelo())
     
     listaFuncoes[opcao - 1]()
 
 def pesquisarNome():
     """
     Pesquisa um filme pelo nome e tenta adicionar no carrinho
-    Não está com o SQL!
     """
     global carrinho #Essa função mexe com o carrinho, que está de alguma forma implementado
 
+    titulo("Pesquisa por Nome", Texto.negrito())
+
     nomeFilme = input("Nome do Filme que você deseja pesquisar: ") #Pega o input
 
-    filmes = [Filme(2, "Avengers Endgame", "2019-09-05", "Herói", "Marvel", "Joe Russo", 9, 8.7),
-              Filme(1, "Revenge of The Sith", "2005-05-05", "Ficção", "Lucasfilm", "George Lucas", 10, 12),
-              ] #Coloca na lista de filmes o que supostamente veio do sql
+    resultado = manipulaDaos.daoFilme.findByName(nomeFilme)
 
-    for filme in filmes: #Mostra os filmes
-        print(filme.stringFilme())
-
-    adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
-    if adicionar:
-        while(True):
-            id = input("Digite o ID do filme que deseja adicionar no carrinho: ") #A adição será feita pelo ID
-            #Prefiro assim pra não haver possibilidade de adição de filme repetido
-            if not(id.isdigit()):
-                print(f"{textoCor("ID inválido!", Texto.vermelho())}")
-                continue
-
-            break
-        
-        for filme in filmes:
-            if filme.id == int(id):
-                carrinho.append(DVD(filme.id, 1, filme.nome))
-                break
-        
-        loading("Carregando", Texto.ciano())
+    if resultado.empty:
+        print(textoCor("Não há filmes com esse nome!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
         menuAluguelDeFilmes()
     else:
-        loading("Carregando", Texto.ciano())
-        menuAluguelDeFilmes()
+        for _, row in resultado.iterrows(): #Mostra os filmes
+            filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
+            print(filme.stringFilme())
+
+        adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+  
+        if adicionar:
+            idFilme = checaEntrada("\nDigite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
+            
+            qtdFilme = checaEntrada(f"\nDigite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit()))
+
+            for _,row in resultado.iterrows():
+                if int(row.iloc[0]) == int(idFilme):
+                    if int(qtdFilme) > int(row.iloc[6]):
+                        print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
+                        time.sleep(0.5)
+                        break
+
+                    carrinho.append(FilmeCarrinho(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], qtdFilme, row.iloc[7]))
+                    print(f"{textoCor(f"Foram adicionados {qtdFilme} unidades de {row.iloc[1]} no carrinho!", Texto.verde())}")
+                    time.sleep(0.5)
+                    break
+            
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+        else:
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
 
 def pesquisarPreco():
     """
@@ -450,75 +453,224 @@ def pesquisarPreco():
     Que seria convertido numa expressão booleana. Mas não sei se vai dar
     Não está com SQL!
     """
-    global carrinho #Mexe com o carrinho que está de alguma forma implementado
+    global carrinho #Essa função mexe com o carrinho, que está de alguma forma implementado
 
-    rangePreco = input("Expressão de preço que deseja pesquisar: (Ex: preco > 10 and preco < 20) ") #Pergunta o range de preço
+    titulo("Pesquisa por Preço", Texto.negrito())
 
-    filmes = [Filme(2, "Avengers Endgame", "2019-09-05", "Herói", "Marvel", "Joe Russo", 9, 8.7),
-              Filme(1, "Revenge of The Sith", "2005-05-05", "Ficção", "Lucasfilm", "George Lucas", 10, 12),
-              ] #Coloca os filmes pegos no SQL 
+    input(f"{textoCor("Indique a faixa de Range de preço que você quer procurar o filme\n", Texto.amarelo())}Ela será no formato 'Preço entre X e Y\nPrimeiro perguntarei o X e depois o Y\nDigite qualquer tecla para continuar': ")
 
-    for filme in filmes:
-        print(filme.stringFilme())
+    range1 = checaEntrada("\nDigite o X na expressão 'Preço entre X e Y': ", "Número inválido", lambda x: not(x.isdigit()))
+    range2 = checaEntrada(f"Digite o Y na expressão 'Preço entre {range1} e Y': ", "Número inválido", lambda x: not(x.isdigit()))
+                            
+    resultado = manipulaDaos.daoFilme.findByRangePrice(range1, range2) #Tenta achar o filme pelo nome
 
-    adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
-    if adicionar:
-        while(True):
-            id = input("Digite o ID do filme que deseja adicionar no carrinho: ")
-            if not(id.isdigit()):
-                print(f"{textoCor("ID inválido!", Texto.vermelho())}")
-                continue
-
-            break
-        
-        for filme in filmes:
-            if filme.id == int(id):
-                carrinho.append(DVD(filme.id, 1, filme.nome))
-                break
-        
-        loading("Carregando", Texto.ciano())
+    if resultado.empty:
+        print(textoCor("Não há filmes nessa faixa de preço!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
         menuAluguelDeFilmes()
     else:
-        loading("Carregando", Texto.ciano())
-        menuAluguelDeFilmes()
+        for _, row in resultado.iterrows(): #Mostra os filmes
+            filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
+            print(filme.stringFilme())
+
+        adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+  
+        if adicionar:
+            idFilme = checaEntrada("Digite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
+            
+            qtdFilme = checaEntrada(f"Digite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit()))
+
+            for _,row in resultado.iterrows():
+                if int(row.iloc[0]) == int(idFilme):
+                    if int(qtdFilme) > int(row.iloc[6]):
+                        print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
+                        time.sleep(0.5)
+                        break
+
+                    carrinho.append(FilmeCarrinho(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], qtdFilme, row.iloc[7]))
+                    print(f"{textoCor(f"Foram adicionados {qtdFilme} unidades de {row.iloc[1]} no carrinho!", Texto.verde())}")
+                    time.sleep(0.5)
+                    break
+            
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+        else:
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
 
 def pesquisarGenero():
     """
     Pesquisa um filme pelo seu gênero
     Não está com o SQL!
     """
+    global carrinho #Essa função mexe com o carrinho, que está de alguma forma implementado
 
-    global carrinho #Mexe com o carrinho que está de alguma forma implementado
+    titulo("Pesquisa por Gênero", Texto.negrito())
 
-    genero = input("Gênero do filme que desejas pesquisar: ")
+    nomeFilme = input("Gênero do Filme que você deseja pesquisar: ") #Pega o input
 
-    filmes = [Filme(2, "Avengers Endgame", "2019-09-05", "Herói", "Marvel", "Joe Russo", 9, 8.7),
-              Filme(1, "Revenge of The Sith", "2005-05-05", "Ficção", "Lucasfilm", "George Lucas", 10, 12),
-              ]
+    resultado = manipulaDaos.daoFilme.findByGenre(nomeFilme)
 
-    for filme in filmes:
-        print(filme.stringFilme())
-
-    adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
-    if adicionar:
-        while(True):
-            id = input("Digite o ID do filme que deseja adicionar no carrinho: ")
-            if not(id.isdigit()):
-                print(f"{textoCor("ID inválido!", Texto.vermelho())}")
-                continue
-            break
-        
-        for filme in filmes:
-            if filme.id == int(id):
-                carrinho.append(DVD(filme.id, 1, filme.nome))
-                break
-        
-        loading("Carregando", Texto.ciano())
+    if resultado.empty:
+        print(textoCor("Não há filmes desse gênero!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
         menuAluguelDeFilmes()
     else:
-        loading("Carregando", Texto.ciano())
-        menuAluguelDeFilmes()
+        for _, row in resultado.iterrows(): #Mostra os filmes
+            filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
+            print(filme.stringFilme())
 
+        adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+  
+        if adicionar:
+            idFilme = checaEntrada("\nDigite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
+            
+            qtdFilme = checaEntrada(f"\nDigite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit()))
+
+            for _,row in resultado.iterrows():
+                if int(row.iloc[0]) == int(idFilme):
+                    if int(qtdFilme) > int(row.iloc[6]):
+                        print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
+                        time.sleep(0.5)
+                        break
+
+                    carrinho.append(FilmeCarrinho(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], qtdFilme, row.iloc[7]))
+                    print(f"{textoCor(f"Foram adicionados {qtdFilme} unidades de {row.iloc[1]} no carrinho!", Texto.verde())}")
+                    time.sleep(0.5)
+                    break
+            
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+        else:
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+
+def pesquisarFilmeAtor():
+    global carrinho #Essa função mexe com o carrinho, que está de alguma forma implementado
+
+    titulo("Pesquisa por Gênero", Texto.negrito())
+
+    nomeAtor = input("Pesquise filmes em que aparecem o ator: ") #Pega o input
+
+    resultado = manipulaDaos.daoElenco.getFilmeByAtor(nomeAtor)
+
+    if resultado.empty:
+        print(textoCor("Não há filmes com esse ator no nosso sistema!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
+        menuAluguelDeFilmes()
+    else:
+        for _, row in resultado.iterrows(): #Mostra os filmes
+            filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
+            print(filme.stringFilme())
+
+        adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+  
+        if adicionar:
+            idFilme = checaEntrada("\nDigite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
+            
+            qtdFilme = checaEntrada(f"\nDigite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit()))
+
+            for _,row in resultado.iterrows():
+                if int(row.iloc[0]) == int(idFilme):
+                    if int(qtdFilme) > int(row.iloc[6]):
+                        print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
+                        time.sleep(0.5)
+                        break
+
+                    carrinho.append(FilmeCarrinho(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], qtdFilme, row.iloc[7]))
+                    print(f"{textoCor(f"Foram adicionados {qtdFilme} unidades de {row.iloc[1]} no carrinho!", Texto.verde())}")
+                    time.sleep(0.5)
+                    break
+            
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+        else:
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+def pesquisarFilmeNacionalidade():
+    global carrinho #Essa função mexe com o carrinho, que está de alguma forma implementado
+
+    titulo("Pesquisa por Atores de uma Nacionalidade", Texto.negrito())
+
+    nacionalidade = input("Pesquise filmes em que aparecem Atores da Nacionalidade: ") #Pega o input
+
+    resultado = manipulaDaos.daoElenco.getFilmeByNacionalidade(nacionalidade)
+
+    if resultado.empty:
+        print(textoCor("Não há filmes com atores dessa nacionalidade no nosso sistema!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
+        menuAluguelDeFilmes()
+    else:
+        for _, row in resultado.iterrows(): #Mostra os filmes
+            filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
+            print(filme.stringFilme())
+
+        adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+  
+        if adicionar:
+            idFilme = checaEntrada("\nDigite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
+            
+            qtdFilme = checaEntrada(f"\nDigite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit()))
+
+            for _,row in resultado.iterrows():
+                if int(row.iloc[0]) == int(idFilme):
+                    if int(qtdFilme) > int(row.iloc[6]):
+                        print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
+                        time.sleep(0.5)
+                        break
+
+                    carrinho.append(FilmeCarrinho(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], qtdFilme, row.iloc[7]))
+                    print(f"{textoCor(f"Foram adicionados {qtdFilme} unidades de {row.iloc[1]} no carrinho!", Texto.verde())}")
+                    time.sleep(0.5)
+                    break
+            
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+        else:
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+def pesquisarFilmeDiretor():
+    global carrinho #Essa função mexe com o carrinho, que está de alguma forma implementado
+
+    titulo("Pesquisa Filme por Diretor", Texto.negrito())
+
+    diretor = input("Pesquise filmes do Diretor ") #Pega o input
+
+    resultado = manipulaDaos.daoFilme.findByDirector(diretor)
+
+    if resultado.empty:
+        print(textoCor("Não há filmes desse diretor no nosso sistema!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
+        menuAluguelDeFilmes()
+    else:
+        for _, row in resultado.iterrows(): #Mostra os filmes
+            filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
+            print(filme.stringFilme())
+
+        adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+  
+        if adicionar:
+            idFilme = checaEntrada("\nDigite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
+            
+            qtdFilme = checaEntrada(f"\nDigite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit()))
+
+            for _,row in resultado.iterrows():
+                if int(row.iloc[0]) == int(idFilme):
+                    if int(qtdFilme) > int(row.iloc[6]):
+                        print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
+                        time.sleep(0.5)
+                        break
+
+                    carrinho.append(FilmeCarrinho(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], qtdFilme, row.iloc[7]))
+                    print(f"{textoCor(f"Foram adicionados {qtdFilme} unidades de {row.iloc[1]} no carrinho!", Texto.verde())}")
+                    time.sleep(0.5)
+                    break
+            
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
+        else:
+            loading("Carregando", Texto.amarelo())
+            menuAluguelDeFilmes()
 
 def menuCadastroEstoque():
     """
@@ -534,7 +686,7 @@ def voltarMenuLoja():
     """
     Função que redireciona para o menu da loja
     """
-    loading("Carregando", Texto.ciano())
+    loading("Carregando", Texto.amarelo())
     menuLoja()
 
 def verCarrinho():
@@ -548,22 +700,22 @@ def verCarrinho():
 
     if carrinho == []:
         print("O carrinho está vazio!\n")
-        loading("Carregando", Texto.ciano())
+        loading("Carregando", Texto.amarelo())
         menuLoja()
     else:
         print(len(carrinho))
         for item in carrinho:
-            print(item.stringDVD())
+            print(item.stringFilmeCarrinho())
         
         print()
 
         finalizar = whileOutro("Deseja finalizar a compra?(Y/N) ")
         if finalizar:
-            loading("Carregando", Texto.ciano())
+            loading("Carregando", Texto.amarelo())
             finalizarCompra()
         else:
             input("Pressione qualquer tecla para voltar ao Menu da Loja ")
-            loading("Carregando", Texto.ciano())
+            loading("Carregando", Texto.amarelo())
             menuLoja()
 
 def finalizarCompra():
@@ -577,7 +729,7 @@ def finalizarCompra():
     titulo("FINALIZAR COMPRA", Texto.negrito())
 
     for item in carrinho:
-        print(item.stringDVD())
+        print(item.stringFilmeCarrinho())
 
     print(f"\nO total do aluguel é de {totalCompra}\n")
     print("Qual a forma de pagamento desejada?\n")
@@ -608,7 +760,7 @@ def finalizarCompra():
     carrinho = []
 
     input("Aperte qualquer tecla para continuar! ")
-    loading("Carregando", Texto.ciano())
+    loading("Carregando", Texto.amarelo())
     menuLoja()
 
 
@@ -620,7 +772,7 @@ def alugueisConfirmacao():
     tirar se for necessário
     """
     print("Seção de confirmação ainda não foi feita!")
-    loading("Carregando", Texto.ciano())
+    loading("Carregando", Texto.amarelo())
     menuInformacoesUsuario()
 
 def exibirInformacoesUsuario():
@@ -725,7 +877,6 @@ def cadastroCliente():
 
         loading("Carregando", Texto.amarelo())
         menuIniciar() #Redireciona para o primeiro menu
-
     else:
         print(f"{textoCor("Cliente inserido com sucesso", Texto.verde())}") 
         entrar = whileOutro("Deseja entrar com esse usuário? (Y/N)") #Vê se o usuário só quis cadastrar o cliente
@@ -764,17 +915,18 @@ def cadastroVendedor():
     funcionario = Funcionario(-1,primeiroNome, segundoNome, login, senha, "Vendedor")
 
     try:
-        idFuncionario = manipulaDaos.daoFuncionario.inserir(funcionario)
+        idFuncionario = manipulaDaos.daoFuncionario.inserirVendedor(funcionario)
     except mysql.connector.Error as err:
         if err.errno == 1062:
             print(f"{textoCor("Inserção inválida! Login já existente!", Texto.vermelho())}")
         else:
+            print(err)
             print(f"{textoCor("Erro ao tentar inserir funcionário!", Texto.vermelho())}")
         loading("Carregando", Texto.amarelo())
-        menuIniciar()
+        menuCadastroFuncionario()
 
     else:
-        print(f"{textoCor("Funcionário inserido com sucesso", Texto.verde())}")
+        print(f"{textoCor(f"Funcionário de id {idFuncionario} inserido com sucesso", Texto.verde())}")
         loading("Carregando", Texto.amarelo())
         menuCadastroFuncionario()
 

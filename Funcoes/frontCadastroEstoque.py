@@ -29,7 +29,7 @@ def menuCadastro(manipulaDaos):
         daoFilme: Objeto que implementa a interface FilmeDao
     """
 
-    listaFuncoes = [menuInserir, menuAlterar, menuPesquisar, menuRemover, menuListar, menuExibir, menuRelatorio, menuSair]
+    listaFuncoes = [menuInserir, menuAlterar, pesquisarNome, pesquisarFaixa, pesquisarGenero, pesquisarNacionalidade, pesquisarQtdEstoque, menuRemover, menuListar, menuExibir, menuRelatorio, menuSair]
 
     #Lista das funções que serão utilizadas. Todas elas tem assinatura parecidas para 
     #evitar o uso excessivo de ifs ou de switch cases
@@ -41,11 +41,15 @@ def menuCadastro(manipulaDaos):
         print(textoCor("1 - ", cor) + "Inserir Filme\n")
         print(textoCor("2 - ", cor) + "Alterar Filme\n")
         print(textoCor("3 - ", cor) + "Pesquisar por Nome\n")
-        print(textoCor("4 - ", cor) + "Remover Filme\n")
-        print(textoCor("5 - ", cor) + "Listar todos os Filmes\n")
-        print(textoCor("6 - ", cor) + "Exibir um filme\n")
-        print(textoCor("7 - ", cor) + "Exibir Relatório\n")
-        print(textoCor("8 - ", cor) + "Voltar para o Menu da Loja\n")
+        print(textoCor("4 - ", cor) + "Pesquisar por Faixa de Preço\n")
+        print(textoCor("5 - ", cor) + "Pesquisar por Gênero\n")
+        print(textoCor("6 - ", cor) + "Pesquisar por nacionalidade dos atores\n")
+        print(textoCor("7 - ", cor) + "Pesquisar por quantidade em estoque\n")
+        print(textoCor("8 - ", cor) + "Remover Filme\n")
+        print(textoCor("9 - ", cor) + "Listar todos os Filmes\n")
+        print(textoCor("10 - ", cor) + "Exibir um filme\n")
+        print(textoCor("11 - ", cor) + "Exibir Relatório\n")
+        print(textoCor("12 - ", cor) + "Voltar para o Menu da Loja\n")
 
         try:
             opcao = int(input("Escolha uma opção: "))
@@ -54,13 +58,13 @@ def menuCadastro(manipulaDaos):
             loading("Recarregando", Texto.ciano())
             continue
         
-        if opcao <= 0 or opcao > 8: #Trata um input fora das opções válidas
+        if opcao <= 0 or opcao > len(listaFuncoes): #Trata um input fora das opções válidas
             print(textoCor("Opcão Inválida!\n",Texto.vermelho()))
             loading("Recarregando", Texto.ciano())
             continue
 
         listaFuncoes[opcao - 1]
-        if opcao != 8:
+        if opcao != len(listaFuncoes):
             loading(f"Carregando", Texto.amarelo())
         sair = listaFuncoes[opcao - 1](manipulaDaos) #A função sair retorna True quando chamado para fazer o controle do menu
         #O resto das funções retorna None
@@ -244,8 +248,9 @@ def menuAlterar(manipulaDaos):
     
     loading("Saindo", Texto.amarelo())
 
+
 #Função que controla as pesquisas de filmes
-def menuPesquisar(manipulaDaos):
+def pesquisarNome(manipulaDaos):
     """
     Menu de Pesquisa de filmes
     Args:
@@ -261,8 +266,12 @@ def menuPesquisar(manipulaDaos):
 
         if filmes.empty: #Se não há filmes com esse padrão de nome
             print(textoCor("Não há nenhum filme cadastrado com esse nome!", Texto.vermelho()))
-            loading("Recarregando", Texto.ciano())
-            continue
+            menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+            if menuPesquisar:
+                loading("Recarregando", Texto.ciano())
+                continue
+            loading("Carregando", Texto.ciano())
+            break
 
         print("\n")
     
@@ -275,6 +284,152 @@ def menuPesquisar(manipulaDaos):
             loading("Recarregando", Texto.ciano())
             
     loading("Saindo", Texto.amarelo())
+
+#Função que controla as pesquisas de filmes
+def pesquisarFaixa(manipulaDaos):
+    """
+    Menu de Pesquisa de filmes
+    Args:
+        daoFilme: Objeto que implementa a interface FilmeDao
+    """
+    
+    menuPesquisar = True
+    while(menuPesquisar):
+        titulo("PESQUISA DE FILMES", Texto.negrito())
+
+        input(f"{textoCor("Indique a faixa de Range de preço que você quer procurar o filme\n", Texto.amarelo())}Ela será no formato 'Preço entre X e Y\nPrimeiro perguntarei o X e depois o Y\nDigite qualquer tecla para continuar': ")
+        range1 = checaEntrada("\nDigite o X na expressão 'Preço entre X e Y': ", "Número inválido", lambda x: not(x.isdigit()))
+        range2 = checaEntrada(f"Digite o Y na expressão 'Preço entre {range1} e Y': ", "Número inválido", lambda x: not(x.isdigit()))
+                              
+        filmes = manipulaDaos.daoFilme.findByRangePrice(range1, range2) #Tenta achar o filme pelo nome
+
+        if filmes.empty: #Se não há filmes com esse padrão de preço
+            print(textoCor("Não há nenhum filme cadastrado nessa faixa de preço!", Texto.vermelho()))
+            menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+            if menuPesquisar:
+                loading("Recarregando", Texto.ciano())
+                continue
+            loading("Carregando", Texto.ciano())
+            break
+
+        print("\n")
+    
+        for index, row in filmes.iterrows():
+            filme = Filme(row[ID], row[NOME], row[DATA_LANCAMENTO], row[GENERO], row[NOME_ESTUDIO], row[NOME_DIRETOR], row[QTD_ESTOQUE], row[PRECO_ALUGUEL])
+            print(filme.stringFilme(), end="\n\n")
+
+        menuPesquisar = whileOutro("\nDeseja pesquisar outros filmes? (Y/N) ")
+        if menuPesquisar:
+            loading("Recarregando", Texto.ciano())
+            
+    loading("Saindo", Texto.amarelo())
+
+#Função que controla as pesquisas de filmes
+def pesquisarGenero(manipulaDaos):
+    """
+    Menu de Pesquisa de filmes
+    Args:
+        daoFilme: Objeto que implementa a interface FilmeDao
+    """
+    
+    menuPesquisar = True
+    while(menuPesquisar):
+        titulo("PESQUISA DE FILMES", Texto.negrito())
+
+        genero = input("Gênero do filme que desejas pesquisar: ")
+        filmes = manipulaDaos.daoFilme.findByGenre(genero) #Tenta achar o filme pelo nome
+
+        if filmes.empty: #Se não há filmes com esse padrão de nome
+            print(textoCor("Não há nenhum filme cadastrado com esse gênero!", Texto.vermelho()))
+            menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+            if menuPesquisar:
+                loading("Recarregando", Texto.ciano())
+                continue
+            loading("Carregando", Texto.ciano())
+            break
+
+        print("\n")
+    
+        for index, row in filmes.iterrows():
+            filme = Filme(row[ID], row[NOME], row[DATA_LANCAMENTO], row[GENERO], row[NOME_ESTUDIO], row[NOME_DIRETOR], row[QTD_ESTOQUE], row[PRECO_ALUGUEL])
+            print(filme.stringFilme(), end="\n\n")
+
+        menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+        if menuPesquisar:
+            loading("Recarregando", Texto.ciano())
+            
+    loading("Saindo", Texto.amarelo())
+
+#Função que controla as pesquisas de filmes
+def pesquisarNacionalidade(manipulaDaos):
+    """
+    Menu de Pesquisa de filmes
+    Args:
+        daoFilme: Objeto que implementa a interface FilmeDao
+    """
+    
+    menuPesquisar = True
+    while(menuPesquisar):
+        titulo("PESQUISA DE FILMES", Texto.negrito())
+
+        nacionalidade = input("Filmes que possuem atores do país: ")
+        filmes = manipulaDaos.daoElenco.getFilmeByNacionalidade(nacionalidade) #Tenta achar o filme pelo nome
+
+        if filmes.empty: #Se não há filmes com esse padrão de nome
+            print(textoCor("Não há nenhum filme cadastrado com atores desse país!", Texto.vermelho()))
+            menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+            if menuPesquisar:
+                loading("Recarregando", Texto.ciano())
+                continue
+            loading("Carregando", Texto.ciano())
+            break
+
+        print("\n")
+    
+        for _, row in filmes.iterrows():
+            filme = Filme(row["IdFilme"], row["NomeFilme"], row[DATA_LANCAMENTO], row[GENERO], row[NOME_ESTUDIO], row[NOME_DIRETOR], row[QTD_ESTOQUE], row[PRECO_ALUGUEL])
+            print(filme.stringFilme(), end="\n\n")
+
+        menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+        if menuPesquisar:
+            loading("Recarregando", Texto.ciano())
+            
+    loading("Saindo", Texto.amarelo())
+
+def pesquisarQtdEstoque(manipulaDaos):
+    menuPesquisar = True
+    while(menuPesquisar):
+        titulo("PESQUISA DE FILMES", Texto.negrito())
+
+        input(f"{textoCor("Indique a faixa de Range de quantidade em estoque que você quer procurar o filme\n", Texto.amarelo())}Ela será no formato 'Preço entre X e Y\nPrimeiro perguntarei o X e depois o Y\nDigite qualquer tecla para continuar': ")
+        range1 = checaEntrada("\nDigite o X na expressão 'Quantidade em estoque entre X e Y: '", "Número inválido", lambda x: not(x.isdigit()))
+        range2 = checaEntrada(f"Digite o Y na expressão 'Quantidade em estoque entre {range1} e Y: ", "Número inválido", lambda x: not(x.isdigit()))
+                              
+        filmes = manipulaDaos.daoFilme.findByRangeQtdEstoque(range1, range2) #Tenta achar o filme pelo nome
+
+        if filmes.empty: #Se não há filmes com esse padrão de preço
+            print(textoCor("Não há nenhum filme cadastrado dentro desse range de estoques!", Texto.vermelho()))
+
+            menuPesquisar = whileOutro("\nDeseja pesquisar outro filme? (Y/N) ")
+            if menuPesquisar:
+                loading("Recarregando", Texto.ciano())
+                continue
+            loading("Carregando", Texto.ciano())
+            break
+
+        print("\n")
+    
+        for index, row in filmes.iterrows():
+            filme = Filme(row[ID], row[NOME], row[DATA_LANCAMENTO], row[GENERO], row[NOME_ESTUDIO], row[NOME_DIRETOR], row[QTD_ESTOQUE], row[PRECO_ALUGUEL])
+            print(filme.stringFilme(), end="\n\n")
+
+        menuPesquisar = whileOutro("\nDeseja pesquisar outros filmes? (Y/N) ")
+        if menuPesquisar:
+            loading("Recarregando", Texto.ciano())
+            
+    loading("Saindo", Texto.amarelo())
+
+
 
 #Função que controla as remoções de filmes
 def menuRemover(manipulaDaos):
