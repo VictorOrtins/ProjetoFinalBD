@@ -628,7 +628,7 @@ def pagamentoAluguel(cpf, printaCarrinho):
     print(f"{textoCor("Pagamento feito com sucesso!\n", Texto.verde())}")
     print(f"{textoCor("Filmes Alugados!", Texto.verde())}")
 
-    # carrinho = []
+    carrinho = []
 
     input("Aperte qualquer tecla para continuar! ")
     loading("Carregando", Texto.amarelo())
@@ -649,9 +649,61 @@ def confirmarDevolucao():
     Como Marcelo pede para que os vendedores confirmam a compra, acho que seja relevante. A gente pode
     tirar se for necessário
     """
-    print("Seção de confirmação ainda não foi feita!")
-    loading("Carregando", Texto.amarelo())
-    menuInformacoesUsuario()
+    titulo("Menu Confirmação", Texto.negrito())
+
+    cpf = checaEntrada("Digite o CPF do Cliente que deseja confirmar a devolução: ", "CPF Inválido!", lambda x: not(checaSeCPF(x)))
+    
+    resultado = manipulaDaos.daoCliente.findIdByCPF(cpf)
+    if resultado.empty:
+        print(f"{textoCor("Não há cadastro com esse CPF!", Texto.vermelho())}")
+        loading("Carregando", Texto.amarelo())
+        menuInformacoesUsuario()
+    else:
+        idCliente, nomeCliente = resultado.iloc[0,0], resultado.iloc[0,1]
+
+        print(f"{textoCor("Cliente: ", Texto.ciano())} {nomeCliente}\n")
+
+        resultado = manipulaDaos.daoGeral.pegarFilmesSemDevolucao(idCliente)
+
+        if resultado.empty:
+            print(f"{textoCor("Não há filmes a serem devolvidos por esse cliente!", Texto.vermelho())}")
+            loading("Carregando", Texto.amarelo())
+            menuInformacoesUsuario()
+        else:
+            idAlugaAtual = 0
+            idAlugas = []
+            for _, row in resultado.iterrows():
+                if idAlugaAtual != row.iloc[0]:
+                    idAlugaAtual = row.iloc[0]
+                    idAlugas.append(row.iloc[0,0])
+                    print(f"{textoCor("ID do Aluguel: ")}{idAlugaAtual}\n")
+                
+                print(Filme.printaComoFilme(row.iloc[1], row.iloc[2]), "\n")
+
+            idAluguel = checaEntrada("Em qual Aluguel (ID) está o filme da devolução: ", "ID inválido!", lambda x: not(x.isdigit()))
+            if not(idAluguel in idAlugas):
+                print(f"{textoCor("ID de Aluguel Inválido! Voltando ao Menu Anterior!")}")
+                time.sleep(0.5)
+                loading("Carregando", Texto.amarelo())
+                menuInformacoesUsuario()
+            else:
+                idFilme = checaEntrada(f"ID do Filme do Aluguel {idAluguel} que será devolvido: ")
+
+                resultado = manipulaDaos.daoGeral.pegarTudoFilmesSemDevolucao()
+
+                idCerto = False
+                for _, row in resultado.iterrows():
+                    if idAluguel == resultado.iloc[2] and idFilme == resultado.iloc[3]:
+                        idCerto = True
+                
+                if not(idCerto):
+                    print(f"{textoCor("ID de Filme Inválido! Voltando ao Menu Anterior!")}")
+                    time.sleep(0.5)
+                    loading("Carregando", Texto.amarelo())
+                    menuInformacoesUsuario()
+                else:
+                    
+
 
 def exibirInformacoesUsuario():
     """
@@ -732,7 +784,7 @@ def cadastroCliente(cpf):
         loading("Carregando", Texto.amarelo())
         return None
     else:
-        print(f"{textoCor(f"Cliente de CPF {cpf}inserido com sucesso", Texto.verde())}") 
+        print(f"{textoCor(f"Cliente de CPF {cpf} inserido com sucesso", Texto.verde())}") 
 
         loading("Carregando", Texto.amarelo())
         return cpf

@@ -1,4 +1,5 @@
 import mysql
+import pandas as pd
 
 class DaoGeralMySQL():
     def __init__(self, database):
@@ -24,6 +25,43 @@ class DaoGeralMySQL():
         self.cursor.callproc("ProcessarCompra", ( int(idCliente), int(idFuncionario), float(valorFinal), formaPagamento ) )
 
         self.destroiTabelaTemporaria(temp_table)
+
+    def pegarFilmesSemDevolucao(self, idCliente):
+        query = 'SELECT IdAluga, Nome, NumDeItens FROM DVDsNaoDevolvidos WHERE IdCliente = %s ORDER BY IdAluga ASC'
+        value = (idCliente,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+            return pd.DataFrame(columns=colunas)
+        
+        return pd.DataFrame(resultado, colunas)
+    
+    def pegarTudoFilmesSemDevolucao(self, idCliente):
+        query = 'SELECT * FROM DVDsNaoDevolvidos WHERE IdCliente = %s ORDER BY IdAluga ASC'
+        value = (idCliente,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+            return pd.DataFrame(columns=colunas)
+        
+        return pd.DataFrame(resultado, colunas)
+    
+    def devolverFilme(self, idAluga, idFilme):
+        query = 'UPDATE DVD SET Devolvido = True WHERE IdAluga = %s AND IdFilme = %s'
+
+        self.cursor.execute(query)
+
+        self.databases.commit()
         
 
 

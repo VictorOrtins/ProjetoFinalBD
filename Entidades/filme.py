@@ -12,4 +12,5 @@ class Filme:
     def stringFilme(self):
         return "{\n" + f"\tID: {self.id}\n\tNome: {self.nome}\n\tData de Lançamento: {self.dataLancamento}\n\tGênero: {self.genero}\n\tNome do Estúdio: {self.nomeEstudio}\n\tNome do Diretor: {self.nomeDiretor}\n\tQuantidade em Estoque: {self.qtdEstoque}" + f"\n\tPreço do Aluguel: {self.precoAluguel}\n" + "}"
         
-
+    def printaComoFilme(nome, qtdSelecionada):
+        return "{\n" + f"\tNome do Filme: {nome}\n\tqtdSelecionada: {qtdSelecionada}\n" + "}"

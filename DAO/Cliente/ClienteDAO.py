@@ -95,6 +95,22 @@ class ClienteDAOMySQL():
 
         return resultado
     
+    def findIdByCPF(self, cpf):
+        query = f'SELECT ID FROM {self.tabela} WHERE CPF = %s'
+        value = (cpf, )
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        colunas = [desc[0] for desc in self.cursor.description]
+
+        if resultado == []:
+             return pd.DataFrame(columns=colunas)
+        
+        resultado = pd.DataFrame(resultado, colunas)
+
+        return resultado
+
     def findByCPF(self, cpf):
         query = f'SELECT * FROM {self.tabela} WHERE CPF = %s'
         value = (cpf, )
