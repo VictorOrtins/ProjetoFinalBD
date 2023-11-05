@@ -3,6 +3,7 @@ from DAO.Cliente.ClienteDAO import *
 from DAO.Funcionario.funcionarioDAO import *
 from DAO.Elenco.elencoDAO import *
 from DAO.DVD.dvdDAO import *
+from DAO.DaoGeral.daoGeral import *
 
 from Conexao.Conexao import *
 
@@ -24,3 +25,6 @@ class DaoFactory():
     
     def createDvdDAO(self):
         return DvdDaoMySQL(self.mydb)
+    
+    def createDaoGeral(self):
+        return DaoGeralMySQL(self.mydb)

@@ -7,5 +7,7 @@ class ManipulaDAOs():
         self.daoCliente = daoFactory.createClienteDao()
         self.daoFuncionario = daoFactory.createFuncionarioDao()
         self.daoElenco = daoFactory.createElencoDao()
+        self.daoDVD = daoFactory.createDvdDAO()
+        self.daoGeral = daoFactory.createDaoGeral()
 
     

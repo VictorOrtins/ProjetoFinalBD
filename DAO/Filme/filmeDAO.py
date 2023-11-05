@@ -134,7 +134,7 @@ class filmeDAOMySQL():
         return resultado
     
     def findByDirector(self, diretor):
-        query = 'SELECT * FROM Filme WHERE precoAluguel BETWEEN %s AND %s ORDER BY precoAluguel ASC'
+        query = 'SELECT * FROM Filme WHERE NomeDiretor = %s'
 
         value = (diretor,)
 
@@ -226,6 +226,20 @@ class filmeDAOMySQL():
         resultado = self.cursor.fetchall()
 
         return resultado[0][0]
+    
+    def existeFilmeDeID(self, ID):
+        query = 'SELECT * FROM Filme WHERE ID = %s'
+        value = (ID,)
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        if resultado == []:
+            return False
+
+        return True
+
+
 
 
 

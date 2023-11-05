@@ -1,12 +1,10 @@
 class Cliente:
-    def __init__(self, id, cpf, primeiroNome, ultimoNome, cidade, login, senha, isFlamengo, assisteOnePiece):
+    def __init__(self, id, cpf, primeiroNome, ultimoNome, cidade, isFlamengo, assisteOnePiece):
         self.id = id
         self.primeiroNome = primeiroNome
         self.ultimoNome = ultimoNome
         self.cpf = cpf
         self.cidade = cidade
-        self.login = login
-        self.senha = senha
         self.isFlamengo = isFlamengo
         self.assisteOnePiece = assisteOnePiece
 
