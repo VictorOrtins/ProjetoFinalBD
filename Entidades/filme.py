@@ -13,6 +13,12 @@ class Filme:
 
     def stringFilme(self):
         return "{\n" + f"\tID: {self.id}\n\tNome: {self.nome}\n\tData de Lançamento: {self.dataLancamento}\n\tGênero: {self.genero}\n\tNome do Estúdio: {self.nomeEstudio}\n\tNome do Diretor: {self.nomeDiretor}\n\tQuantidade em Estoque: {self.qtdEstoque}" + f"\n\tPreço do Aluguel: {self.precoAluguel}\n" + "}"
-        
+            
     def printaComoFilme(idAluga, idFilme, nome, qtdSelecionada):
-        return "{\n" + f"\n\tId Aluga: {idAluga}\n\tNome do Filme (ID {textoCor(idFilme, Texto.verde())}): {nome}\n\tqtdSelecionada: {qtdSelecionada}\n" + "}"
+        return "{\n" + f"\n\t{textoCor(f"Id Aluga: {idAluga}", Texto.magenta())}\n\tNome do Filme {textoCor(f"ID {idFilme}", Texto.verde())}: {nome}\n\tqtdSelecionada: {qtdSelecionada}\n" + "}"
+    
+    def printaComoFilme2(idAluga, idFilme, nome, qtdSelecionada, devolvido):
+        if devolvido:
+            return "{\n" + f"\n\tId Aluga: {idAluga}\n\tNome do Filme ID {idFilme}: {nome}\n\tqtdSelecionada: {qtdSelecionada}\n\tDevolvido: Sim\n" + "}"
+        else:
+            return "{\n" + f"\n\tId Aluga: {idAluga}\n\tNome do Filme ID {idFilme}: {nome}\n\tqtdSelecionada: {qtdSelecionada}\n\tDevolvido: Não\n" + "}"

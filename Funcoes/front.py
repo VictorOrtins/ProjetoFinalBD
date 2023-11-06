@@ -138,20 +138,20 @@ def menuSistema():
         f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("5 - ", Texto.azul())}Sair da Loja\n"])
 
     elif tipoUsuario == TipoUsuario.SEM_LOGIN: #Se não tiver feito login. A visualização dele é mais parecida com a do cliente
-        listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, pesquisarFilmeAtor, pesquisarFilmeNacionalidade, pesquisarFilmeDiretor, loginFuncionario, sairLoja] #Lista de funções
+        listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, pesquisarFilmeAtor, pesquisarFilmeNacionalidade, pesquisarFilmeDiretor, historicoCliente, loginFuncionario, sairLoja] #Lista de funções
         #Basicamente a mesma coisa do cliente, porém tem a opção de fazer o login e não se pode ver as informações
         #do usuário
         txtInput = "".join([
         f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
         f"{textoCor("4 - ", Texto.azul())}Pesquisar Filme com Ator X\n\n", f"{textoCor("5 - ", Texto.azul())}Pesquisar Filme com Ator de Nacionalidade X\n\n", f"{textoCor("6 - ", Texto.azul())}Pesquisar Filme do Diretor X\n\n",
-        f"{textoCor("7 - ", Texto.azul())}Fazer Login\n\n", f"{textoCor("8 - ", Texto.azul())}Sair\n\n"])
+        f"{textoCor("8 - ", Texto.azul())}Ver Histórico do Cliente\n\n",f"{textoCor("8 - ", Texto.azul())}Fazer Login\n\n", f"{textoCor("9 - ", Texto.azul())}Sair\n\n"])
 
     elif tipoUsuario == TipoUsuario.GERENTE:
-        listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, menuCadastroFuncionario, confirmarDevolucao, sairLoja] #Define as funções
+        listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, menuCadastroFuncionario, confirmarDevolucao, historicoCliente, sairLoja] #Define as funções
 
         #Mesma coisa do vendedor porém com a opção de cadastrar vendedores
         txtInput = "".join([f"{textoCor("Gerente: ", Texto.verde())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Informações do Usuário\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("5 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("6 - ", Texto.azul())}Sair da Loja\n"])
+        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("5 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("6 - ", Texto.azul())}Histórico de Cliente\n\n",f"{textoCor("7 - ", Texto.azul())}Sair da Loja\n"])
 
     while(True):
         #Loop do menu da loja
@@ -365,7 +365,7 @@ def pesquisarGeral(podeAddCarrinho, txtPesquisa, txtInput, txtErroVazio, dao):
                                     break
                             
                             if podeContinuar:
-                                if int(qtdFilme) > int(row.iloc[6]):
+                                if int(qtdFilme) > int(row.iloc[6]) or int(qtdFilme) <= 0:
                                         print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
                                         time.sleep(0.5)
                                         break
@@ -429,17 +429,18 @@ def pesquisarPreco(podeAddCarrinho):
 
         if podeAddCarrinho:
             adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
+            print()
     
             if adicionar:
                 idFilme = checaEntrada("Digite o ID do filme que deseja adicionar no carrinho: ", "ID Inválido", lambda x: not(x.isdigit()))
-
+                print()
                 idValido = False
                 for _, row in resultado.iterrows():
                     if int(row.iloc[0]) == int(idFilme):
                         idValido = True
                 
                 if idValido:
-                    qtdFilme = int(checaEntrada(f"Digite a quantidade do filme de ID {idFilme} que deseja adicionar: ", "Quantidade inválida!", lambda x: not(x.isdigit())))
+                    qtdFilme = int(checaEntrada(f"Digite a quantidade do filme de ID {idFilme} que deseja adicionar: \n", "Quantidade inválida!", lambda x: not(x.isdigit())))
 
                     podeContinuar = True
 
@@ -460,7 +461,7 @@ def pesquisarPreco(podeAddCarrinho):
                                     break
                             
                             if podeContinuar:
-                                if int(qtdFilme) > int(row.iloc[6]):
+                                if int(qtdFilme) > int(row.iloc[6]) or int(qtdFilme) <= 0:
                                         print(f"{textoCor("Quantidade selecionada inválida! O filme não será colocado no carrinho!", Texto.vermelho())}")
                                         time.sleep(0.5)
                                         break
@@ -597,12 +598,12 @@ def finalizarCompra():
     for item in carrinho:
         print(item.stringFilmeCarrinho())
 
-    cpf = checaEntrada("Digite o CPF do Cliente que está fazendo a compra que está no carrinho: ", "CPF inválido", lambda x: not(checaSeCPF(x)))
+    cpf = checaEntrada("Digite o CPF do Cliente que está fazendo a compra que está no carrinho: \n", "CPF inválido", lambda x: not(checaSeCPF(x)))
 
     resultado = manipulaDaos.daoCliente.findByCPF(cpf)
 
     if resultado.empty:
-        cadastrar = whileOutro("Deseja cadastrar o cliente no sistema para prosseguir com a compra? (Y/N)")
+        cadastrar = whileOutro("Deseja cadastrar o cliente no sistema para prosseguir com a compra? (Y/N)\n")
         if cadastrar:
             loading("Carregando",Texto.amarelo())
             cadastroCliente(cpf)
@@ -724,7 +725,7 @@ def confirmarDevolucao():
                 print(f"{textoCor("ID de Aluguel Inválido! Voltando ao Menu Anterior!", Texto.vermelho())}")
                 time.sleep(0.5)
                 loading("Carregando", Texto.amarelo())
-                menuInformacoesUsuario()
+                menuSistema()
             else:
                 idFilme = int(checaEntrada(f"ID do Filme do Aluguel {idAluguel} que será devolvido: ", "ID inválido", lambda x: not(x.isdigit())))
 
@@ -802,8 +803,18 @@ def cadastroCliente(cpf):
     cidade = checaEntrada(f"Cidade natal de {primeiroNome}: ", "Cidade inválida!", lambda x: False) #Não há nada que impeça a cidade digitada
     print()
     isFlamengo = inputYNtoBool(f"O Cliente {primeiroNome} torce para o Flamengo? (Y/N)")
-    print()
+    if isFlamengo:
+        isFlamengo = 1
+    else:
+        isFlamengo = 0
+
     assisteOnePiece = inputYNtoBool(f"O cliente {primeiroNome} assiste One Piece? (Y/N)")
+    
+    if assisteOnePiece:
+        assisteOnePiece = 1
+    else:
+        assisteOnePiece = 0
+    
     print()
 
 
@@ -908,3 +919,38 @@ def mostrarFuncionarios():
     input("Digite qualquer tecla para voltar ao menu ")
     loading("Saindo", Texto.amarelo())
     menuCadastroFuncionario()
+
+def historicoCliente():
+    titulo("Histórico do Cliente", Texto.negrito())
+
+    cpf = checaEntrada("Digite o CPF do Cliente que deseja ver o histórico: ", "CPF Inválido!", lambda x: not(checaSeCPF(x)))
+    
+    resultado = manipulaDaos.daoCliente.findIdNomeByCPF(cpf)
+
+    if resultado.empty:
+        print(f"{textoCor("Não há cadastro com esse CPF!", Texto.vermelho())}")
+        loading("Carregando", Texto.amarelo())
+        menuSistema()
+    else:
+        idCliente = resultado.iloc[0,0]
+        nomeCliente =  resultado.iloc[0,1]
+        sobrenomeCliente = resultado.iloc[0,2]
+
+        print(f"{textoCor("Cliente: ", Texto.ciano())} {nomeCliente} {sobrenomeCliente}\n")
+
+        resultado = manipulaDaos.daoGeral.verHistoricoCliente(int(idCliente))
+        if resultado == []:
+            print(f"{textoCor("Esse usuário nunca alugou um filme conosco!", Texto.vermelho())}")
+            loading("Carregando", Texto.amarelo())
+            menuSistema()
+        else:
+            for filme in resultado:
+                print(Filme.printaComoFilme2(filme[0], filme[3], filme[1], filme[2], filme[4]))
+
+            print()
+
+            input("Digite qualquer tecla para ir ao menu!")
+            loading("Carregando", Texto.amarelo())
+            menuSistema()
+
+        

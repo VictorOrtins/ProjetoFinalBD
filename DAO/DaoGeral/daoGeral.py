@@ -53,6 +53,16 @@ class DaoGeralMySQL():
         self.cursor.execute(query, value)
 
         self.database.commit()
+
+    def verHistoricoCliente(self, id):
+        query = 'SELECT IdAluga, Nome, NumDeItens, IdFilme, Devolvido FROM ALUGA A INNER JOIN DVD D ON A.ID = D.IdAluga INNER JOIN Cliente C ON A.IdCliente = C.ID INNER JOIN Filme F ON F.ID = D.IdFilme WHERE IdCliente = %s'
+        value = (id,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        return resultado
         
 
     def criaTabelaTemporaria(self, nome):
