@@ -129,13 +129,13 @@ def menuSistema():
     """
 
     if tipoUsuario == TipoUsuario.VENDEDOR: #Se for um funcionário
-        listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, sairLoja] #Define as funções
+        listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, confirmarDevolucao, sairLoja] #Define as funções
         #Texto que será exibido para o usuário digitar a opção que ele quer
         #Ele vai conter o nome do funcionário, pode redirecionar para o menu de informações de usuário,
         #O menu de cadastro de estoque e para a função que sai do sistema
 
         txtInput = "".join([f"{textoCor("Vendedor: ", Texto.magenta())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Informações do Usuário\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Sair da Loja\n"])
+        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("5 - ", Texto.azul())}Sair da Loja\n"])
 
     elif tipoUsuario == TipoUsuario.SEM_LOGIN: #Se não tiver feito login. A visualização dele é mais parecida com a do cliente
         listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, pesquisarFilmeAtor, pesquisarFilmeNacionalidade, pesquisarFilmeDiretor, loginFuncionario, sairLoja] #Lista de funções
@@ -147,11 +147,11 @@ def menuSistema():
         f"{textoCor("7 - ", Texto.azul())}Fazer Login\n\n", f"{textoCor("8 - ", Texto.azul())}Sair\n\n"])
 
     elif tipoUsuario == TipoUsuario.GERENTE:
-        listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, menuCadastroFuncionario, sairLoja] #Define as funções
+        listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, menuCadastroFuncionario, confirmarDevolucao, sairLoja] #Define as funções
 
         #Mesma coisa do vendedor porém com a opção de cadastrar vendedores
         txtInput = "".join([f"{textoCor("Gerente: ", Texto.verde())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Informações do Usuário\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("5 - ", Texto.azul())}Sair da Loja\n"])
+        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("5 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("6 - ", Texto.azul())}Sair da Loja\n"])
 
     while(True):
         #Loop do menu da loja
@@ -220,7 +220,7 @@ def menuInformacoesUsuario():
     global tipoUsuario #É preciso chegar o tipo de usuário
     global usuario #E mostrar informações do usuário
 
-    listaFuncoes = [exibirInformacoesUsuario, historicoAlugueis, confirmarDevolucao, menuSistema, sairConta] #Funções que podem ser chamadas
+    listaFuncoes = [exibirInformacoesUsuario, historicoAlugueis, menuSistema, sairConta] #Funções que podem ser chamadas
 
     #Pergunta se o funcioário quer ver as informações do funcionário, os aluguéis pendentes de confirmação,
     #Se quer voltar ao menu da loja ou sair da conta
@@ -233,8 +233,8 @@ def menuInformacoesUsuario():
         textoNome2 = "Vendedor"
     
     txtInput = "".join([f"{textoNome}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Exibir Informações do {textoNome2}\n\n",
-    f"{textoCor("2 - ", Texto.azul())}Histórico de Aluguéis\n\n", f"{textoCor("3 - ", Texto.azul())}Confirmar Devolução de Aluguel\n\n",
-    f"{textoCor("4 - ", Texto.azul())}Voltar para o Menu\n\n", f"{textoCor("5 - ", Texto.azul())}Sair da Conta\n\n"])
+    f"{textoCor("2 - ", Texto.azul())}Histórico de Aluguéis\n\n",
+    f"{textoCor("3 - ", Texto.azul())}Voltar para o Menu\n\n", f"{textoCor("4 - ", Texto.azul())}Sair da Conta\n\n"])
 
     while(True):
 
@@ -544,8 +544,46 @@ def verCarrinho():
             loading("Carregando", Texto.amarelo())
             finalizarCompra()
         else:
-            loading("Carregando", Texto.amarelo())
-            menuAluguelDeFilmes()
+            retirar = whileOutro("Deseja retirar algum filme do Carrinho? (Y/N)")
+            if retirar:
+                id = int(checaEntrada("Digite o ID do Filme no Carrinho que deseja retirar: ", "ID inválido!", lambda x: not(x.isdigit())))
+                idCorreto = False
+                for item in carrinho:
+                    if item.id == id:
+                        idCorreto = True
+                
+                if idCorreto:
+                    while(True):
+                        qtd = int(checaEntrada(f"Digite a quantidade do filme de ID {id} que deseja remover: ", "Quantidade inválida", lambda x: not(x.isdigit())))
+                        if qtd < 0:
+                            print(f"{textoCor("Quantidade Inválida!", Texto.vermelho())}")
+                            continue
+                        break
+
+                    for i in range(len(carrinho)):
+                        if carrinho[i].id == id:
+                            index = i
+                            break
+
+                    if qtd > carrinho[index].qtdSelecionada:
+                        print(textoCor("Quantidade inválida! Voltando ao Menu!", Texto.vermelho()))
+                        loading("Carregando", Texto.amarelo())
+                        menuAluguelDeFilmes()
+                    else:
+                        carrinho[index].qtdSelecionada -= qtd
+                        print(textoCor("Remoção feita com sucesso!", Texto.verde()))
+                        if carrinho[index].qtdSelecionada == 0:
+                            carrinho.pop(index)
+                        loading("Carregando", Texto.amarelo())
+                        menuAluguelDeFilmes()
+
+                else:
+                    print(textoCor("ID de Filme Inválido! Voltando ao Menu!", Texto.vermelho()))
+                    loading("Carregando", Texto.amarelo())
+                    menuAluguelDeFilmes()
+            else:
+                loading("Carregando", Texto.amarelo())
+                menuAluguelDeFilmes()
 
 def finalizarCompra():
     """
@@ -639,6 +677,8 @@ def historicoAlugueis():
     """
     Seção da histórico de aluguéis
     """
+    titulo("Histórico de Alugueis", Texto.negrito())
+    
     print("Seção de histórico de aluguéis ainda não foi feita!")
     loading("Carregando", Texto.amarelo())
     menuInformacoesUsuario()
@@ -649,69 +689,68 @@ def confirmarDevolucao():
     Como Marcelo pede para que os vendedores confirmam a compra, acho que seja relevante. A gente pode
     tirar se for necessário
     """
-    titulo("Menu Confirmação", Texto.negrito())
+    titulo("Menu Devolução", Texto.negrito())
 
     cpf = checaEntrada("Digite o CPF do Cliente que deseja confirmar a devolução: ", "CPF Inválido!", lambda x: not(checaSeCPF(x)))
     
-    resultado = manipulaDaos.daoCliente.findIdByCPF(cpf)
+    resultado = manipulaDaos.daoCliente.findIdNomeByCPF(cpf)
     if resultado.empty:
         print(f"{textoCor("Não há cadastro com esse CPF!", Texto.vermelho())}")
         loading("Carregando", Texto.amarelo())
-        menuInformacoesUsuario()
+        menuSistema()
     else:
-        idCliente, nomeCliente = resultado.iloc[0,0], resultado.iloc[0,1]
+        idCliente = resultado.iloc[0,0]
+        nomeCliente =  resultado.iloc[0,1]
+        sobrenomeCliente = resultado.iloc[0,2]
 
-        print(f"{textoCor("Cliente: ", Texto.ciano())} {nomeCliente}\n")
+        print(f"{textoCor("Cliente: ", Texto.ciano())} {nomeCliente} {sobrenomeCliente}\n")
 
-        resultado = manipulaDaos.daoGeral.pegarFilmesSemDevolucao(idCliente)
+        resultado = manipulaDaos.daoGeral.pegarFilmesSemDevolucao(int(idCliente))
 
-        if resultado.empty:
+        if resultado == []:
             print(f"{textoCor("Não há filmes a serem devolvidos por esse cliente!", Texto.vermelho())}")
             loading("Carregando", Texto.amarelo())
-            menuInformacoesUsuario()
+            menuSistema()
         else:
-            idAlugaAtual = 0
             idAlugas = []
-            for _, row in resultado.iterrows():
-                if idAlugaAtual != row.iloc[0]:
-                    idAlugaAtual = row.iloc[0]
-                    idAlugas.append(row.iloc[0,0])
-                    print(f"{textoCor("ID do Aluguel: ")}{idAlugaAtual}\n")
-                
-                print(Filme.printaComoFilme(row.iloc[1], row.iloc[2]), "\n")
+            for item in resultado:
+                if item[0] not in idAlugas:
+                    idAlugas.append(item[0])
+                print(Filme.printaComoFilme(item[0], item[3]
+                                            ,item[1], item[2],), "\n")
 
-            idAluguel = checaEntrada("Em qual Aluguel (ID) está o filme da devolução: ", "ID inválido!", lambda x: not(x.isdigit()))
+            idAluguel = int(checaEntrada("Em qual Aluguel (ID) está o filme da devolução: ", "ID inválido!", lambda x: not(x.isdigit())))
             if not(idAluguel in idAlugas):
-                print(f"{textoCor("ID de Aluguel Inválido! Voltando ao Menu Anterior!")}")
+                print(f"{textoCor("ID de Aluguel Inválido! Voltando ao Menu Anterior!", Texto.vermelho())}")
                 time.sleep(0.5)
                 loading("Carregando", Texto.amarelo())
                 menuInformacoesUsuario()
             else:
-                idFilme = checaEntrada(f"ID do Filme do Aluguel {idAluguel} que será devolvido: ")
-
-                resultado = manipulaDaos.daoGeral.pegarTudoFilmesSemDevolucao()
+                idFilme = int(checaEntrada(f"ID do Filme do Aluguel {idAluguel} que será devolvido: ", "ID inválido", lambda x: not(x.isdigit())))
 
                 idCerto = False
-                for _, row in resultado.iterrows():
-                    if idAluguel == resultado.iloc[2] and idFilme == resultado.iloc[3]:
+                for item in resultado:
+                    if idAluguel == item[0] and idFilme == item[3]:
                         idCerto = True
                 
                 if not(idCerto):
-                    print(f"{textoCor("ID de Filme Inválido! Voltando ao Menu Anterior!")}")
+                    print(f"{textoCor("ID de Filme Inválido! Voltando ao Menu Anterior!", Texto.vermelho())}")
                     time.sleep(0.5)
                     loading("Carregando", Texto.amarelo())
                     menuInformacoesUsuario()
                 else:
+                    manipulaDaos.daoGeral.devolverFilme(idAluguel, idFilme)
+                    print(textoCor("Filme Devolvido com Sucesso!", Texto.verde()))
+                    loading("Carregando", Texto.amarelo())
+                    menuInformacoesUsuario()
                     
-
-
 def exibirInformacoesUsuario():
     """
     Seção que exibe as informações do usuário
     """
 
     titulo("Informações do Usuário", Texto.negrito())
-    print(usuario.stringInformacoes())
+    print(usuario.stringFuncionario())
     
     input("\nAperte qualquer tecla para continuar ")
     loading("Recarregando", Texto.ciano())

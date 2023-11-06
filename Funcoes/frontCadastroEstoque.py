@@ -29,7 +29,7 @@ def menuCadastro(manipulaDaos):
         daoFilme: Objeto que implementa a interface FilmeDao
     """
 
-    listaFuncoes = [menuInserir, menuAlterar, pesquisarNome, pesquisarFaixa, pesquisarGenero, pesquisarNacionalidade, pesquisarQtdEstoque, menuRemover, menuListar, menuExibir, menuRelatorio, menuSair]
+    listaFuncoes = [menuInserir, menuAlterar, pesquisarNome, pesquisarFaixa, pesquisarGenero, pesquisarNacionalidade, pesquisarQtdEstoque, menuRemover, menuSair]
 
     #Lista das funções que serão utilizadas. Todas elas tem assinatura parecidas para 
     #evitar o uso excessivo de ifs ou de switch cases
@@ -46,10 +46,7 @@ def menuCadastro(manipulaDaos):
         print(textoCor("6 - ", cor) + "Pesquisar por nacionalidade dos atores\n")
         print(textoCor("7 - ", cor) + "Pesquisar por quantidade em estoque\n")
         print(textoCor("8 - ", cor) + "Remover Filme\n")
-        print(textoCor("9 - ", cor) + "Listar todos os Filmes\n")
-        print(textoCor("10 - ", cor) + "Exibir um filme\n")
-        print(textoCor("11 - ", cor) + "Exibir Relatório\n")
-        print(textoCor("12 - ", cor) + "Voltar para o Menu da Loja\n")
+        print(textoCor("9 - ", cor) + "Voltar para o Menu da Loja\n")
 
         try:
             opcao = int(input("Escolha uma opção: "))

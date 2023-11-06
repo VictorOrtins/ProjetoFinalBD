@@ -27,19 +27,14 @@ class DaoGeralMySQL():
         self.destroiTabelaTemporaria(temp_table)
 
     def pegarFilmesSemDevolucao(self, idCliente):
-        query = 'SELECT IdAluga, Nome, NumDeItens FROM DVDsNaoDevolvidos WHERE IdCliente = %s ORDER BY IdAluga ASC'
+        query = 'SELECT IdAluga, Nome, NumDeItens, IdFilme FROM DVDsNaoDevolvidos WHERE IdCliente = %s ORDER BY IdAluga ASC'
         value = (idCliente,)
 
         self.cursor.execute(query, value)
 
         resultado = self.cursor.fetchall()
 
-        colunas = [desc[0] for desc in self.cursor.description]
-
-        if resultado == []:
-            return pd.DataFrame(columns=colunas)
-        
-        return pd.DataFrame(resultado, colunas)
+        return resultado
     
     def pegarTudoFilmesSemDevolucao(self, idCliente):
         query = 'SELECT * FROM DVDsNaoDevolvidos WHERE IdCliente = %s ORDER BY IdAluga ASC'
@@ -49,21 +44,16 @@ class DaoGeralMySQL():
 
         resultado = self.cursor.fetchall()
 
-        colunas = [desc[0] for desc in self.cursor.description]
-
-        if resultado == []:
-            return pd.DataFrame(columns=colunas)
-        
-        return pd.DataFrame(resultado, colunas)
+        return resultado
     
     def devolverFilme(self, idAluga, idFilme):
         query = 'UPDATE DVD SET Devolvido = True WHERE IdAluga = %s AND IdFilme = %s'
+        value = (idAluga, idFilme)
 
-        self.cursor.execute(query)
+        self.cursor.execute(query, value)
 
-        self.databases.commit()
+        self.database.commit()
         
-
 
     def criaTabelaTemporaria(self, nome):
         query = f'CREATE TEMPORARY TABLE {nome} (IdAluga INT, IdFilme INT ,NumItens INT)'
