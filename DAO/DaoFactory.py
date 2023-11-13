@@ -4,6 +4,7 @@ from DAO.Funcionario.funcionarioDAO import *
 from DAO.Elenco.elencoDAO import *
 from DAO.DVD.dvdDAO import *
 from DAO.DaoGeral.daoGeral import *
+from DAO.Ator.daoAtor import *
 
 from Conexao.Conexao import *
 
@@ -28,3 +29,6 @@ class DaoFactory():
     
     def createDaoGeral(self):
         return DaoGeralMySQL(self.mydb)
+    
+    def createDaoAtor(self):
+        return AtorDAOMySQL(self.mydb)

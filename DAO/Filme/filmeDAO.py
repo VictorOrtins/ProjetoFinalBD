@@ -238,6 +238,16 @@ class filmeDAOMySQL():
             return False
 
         return True
+    
+    def getIdByNome(self, nome):
+        query = 'SELECT * FROM Filme WHERE Nome = %s'
+        value = (nome,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        return resultado
 
 
 

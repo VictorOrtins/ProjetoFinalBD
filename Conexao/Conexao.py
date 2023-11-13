@@ -9,3 +9,5 @@ class Conexao():
         database="locadora")
 
         return mydb
+    
+

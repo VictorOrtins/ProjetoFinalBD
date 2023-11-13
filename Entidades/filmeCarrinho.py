@@ -11,3 +11,6 @@ class FilmeCarrinho:
 
     def stringFilmeCarrinho(self):
         return "{\n" + f"\tID: {self.id}\n\tNome: {self.nome}\n\tData de Lançamento: {self.dataLancamento}\n\tGênero: {self.genero}\n\tNome do Estúdio: {self.nomeEstudio}\n\tNome do Diretor: {self.nomeDiretor}\n\tQuantidade Selecionada: {self.qtdSelecionada}" + f"\n\tPreço do Aluguel por Unidade: {self.precoAluguelUnidade}\n" + "}"
+    
+    def printaAluguelFuncionario(idAluga, nomeCliente, valorTotal):
+        return "{\n" + f"\tID Aluguel: {idAluga}\n\tNome do Cliente: {nomeCliente}\n\tValor Total: {valorTotal}\n" + "}"

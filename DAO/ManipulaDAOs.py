@@ -9,5 +9,6 @@ class ManipulaDAOs():
         self.daoElenco = daoFactory.createElencoDao()
         self.daoDVD = daoFactory.createDvdDAO()
         self.daoGeral = daoFactory.createDaoGeral()
+        self.daoAtor = daoFactory.createDaoAtor()
 
     

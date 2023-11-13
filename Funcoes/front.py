@@ -135,7 +135,7 @@ def menuSistema():
         #O menu de cadastro de estoque e para a função que sai do sistema
 
         txtInput = "".join([f"{textoCor("Vendedor: ", Texto.magenta())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Informações do Usuário\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("5 - ", Texto.azul())}Sair da Loja\n"])
+        f"{textoCor("2 - ", Texto.azul())}Registrar Aluguel\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("5 - ", Texto.azul())}Sair da Loja\n"])
 
     elif tipoUsuario == TipoUsuario.SEM_LOGIN: #Se não tiver feito login. A visualização dele é mais parecida com a do cliente
         listaFuncoes = [pesquisarNome, pesquisarPreco, pesquisarGenero, pesquisarFilmeAtor, pesquisarFilmeNacionalidade, pesquisarFilmeDiretor, historicoCliente, loginFuncionario, sairLoja] #Lista de funções
@@ -144,14 +144,14 @@ def menuSistema():
         txtInput = "".join([
         f"{textoCor("1 - ", Texto.azul())}Pesquisar por Nome\n\n",f"{textoCor("2 - ", Texto.azul())}Pesquisar por Preço\n\n", f"{textoCor("3 - ", Texto.azul())}Pesquisar por Gênero\n\n",
         f"{textoCor("4 - ", Texto.azul())}Pesquisar Filme com Ator X\n\n", f"{textoCor("5 - ", Texto.azul())}Pesquisar Filme com Ator de Nacionalidade X\n\n", f"{textoCor("6 - ", Texto.azul())}Pesquisar Filme do Diretor X\n\n",
-        f"{textoCor("8 - ", Texto.azul())}Ver Histórico do Cliente\n\n",f"{textoCor("8 - ", Texto.azul())}Fazer Login\n\n", f"{textoCor("9 - ", Texto.azul())}Sair\n\n"])
+        f"{textoCor("7 - ", Texto.azul())}Ver Histórico do Cliente\n\n",f"{textoCor("8 - ", Texto.azul())}Fazer Login\n\n", f"{textoCor("9 - ", Texto.azul())}Sair\n\n"])
 
     elif tipoUsuario == TipoUsuario.GERENTE:
         listaFuncoes = [menuInformacoesUsuario, menuAluguelDeFilmes, menuCadastroEstoque, menuCadastroFuncionario, confirmarDevolucao, historicoCliente, sairLoja] #Define as funções
 
         #Mesma coisa do vendedor porém com a opção de cadastrar vendedores
         txtInput = "".join([f"{textoCor("Gerente: ", Texto.verde())}{usuario.primeiroNome} {usuario.ultimoNome}\n\n",f"{textoCor("1 - ", Texto.azul())}Informações do Usuário\n\n",
-        f"{textoCor("2 - ", Texto.azul())}Registrar Venda\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("5 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("6 - ", Texto.azul())}Histórico de Cliente\n\n",f"{textoCor("7 - ", Texto.azul())}Sair da Loja\n"])
+        f"{textoCor("2 - ", Texto.azul())}Registrar Aluguel\n\n",f"{textoCor("3 - ", Texto.azul())}Cadastro de Estoque\n\n", f"{textoCor("4 - ", Texto.azul())}Cadastro de Vendedores\n\n", f"{textoCor("5 - ", Texto.azul())}Devolução de Filmes\n\n", f"{textoCor("6 - ", Texto.azul())}Histórico de Cliente\n\n",f"{textoCor("7 - ", Texto.azul())}Sair da Loja\n"])
 
     while(True):
         #Loop do menu da loja
@@ -330,7 +330,8 @@ def pesquisarGeral(podeAddCarrinho, txtPesquisa, txtInput, txtErroVazio, dao):
     else:
         for _, row in resultado.iterrows(): #Mostra os filmes
             filme = Filme(row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7])
-            print(filme.stringFilme(), "\n")
+            print(filme.stringFilme())
+            print()
 
         if podeAddCarrinho:
             adicionar = whileOutro("Deseja adicionar um desses filmes no carrinho? (Y/N)")
@@ -598,12 +599,13 @@ def finalizarCompra():
     for item in carrinho:
         print(item.stringFilmeCarrinho())
 
-    cpf = checaEntrada("Digite o CPF do Cliente que está fazendo a compra que está no carrinho: \n", "CPF inválido", lambda x: not(checaSeCPF(x)))
-
+    cpf = checaEntrada("Digite o CPF do Cliente que está fazendo a compra que está no carrinho: ", "CPF inválido", lambda x: not(checaSeCPF(x)))
+    print()
     resultado = manipulaDaos.daoCliente.findByCPF(cpf)
 
     if resultado.empty:
         cadastrar = whileOutro("Deseja cadastrar o cliente no sistema para prosseguir com a compra? (Y/N)\n")
+        print()
         if cadastrar:
             loading("Carregando",Texto.amarelo())
             cadastroCliente(cpf)
@@ -680,10 +682,22 @@ def historicoAlugueis():
     """
     titulo("Histórico de Alugueis", Texto.negrito())
     
-    print("Seção de histórico de aluguéis ainda não foi feita!")
-    loading("Carregando", Texto.amarelo())
-    menuInformacoesUsuario()
 
+    resultado = manipulaDaos.daoGeral.pegaAluguelFuncionario(int(usuario.ID))
+    if resultado == []:
+        print(textoCor(f"{usuario.primeiroNome} ainda não consumou nenhum aluguel!", Texto.vermelho()))
+        loading("Carregando", Texto.amarelo())
+        menuInformacoesUsuario()
+    else:
+        for aluguel in resultado:
+            print(FilmeCarrinho.printaAluguelFuncionario(aluguel[0], f"{aluguel[1]} {aluguel[2]}", aluguel[3]))
+            print()
+
+        input("Digite qualquer tecla para voltar ao menu ")
+        loading("Carregando", Texto.amarelo())
+        menuInformacoesUsuario()
+
+    
 def confirmarDevolucao():
     """
     Seção da confirmação de aluguéis
@@ -738,12 +752,12 @@ def confirmarDevolucao():
                     print(f"{textoCor("ID de Filme Inválido! Voltando ao Menu Anterior!", Texto.vermelho())}")
                     time.sleep(0.5)
                     loading("Carregando", Texto.amarelo())
-                    menuInformacoesUsuario()
+                    menuSistema()
                 else:
                     manipulaDaos.daoGeral.devolverFilme(idAluguel, idFilme)
                     print(textoCor("Filme Devolvido com Sucesso!", Texto.verde()))
                     loading("Carregando", Texto.amarelo())
-                    menuInformacoesUsuario()
+                    menuSistema()
                     
 def exibirInformacoesUsuario():
     """
@@ -808,6 +822,7 @@ def cadastroCliente(cpf):
     else:
         isFlamengo = 0
 
+    print()
     assisteOnePiece = inputYNtoBool(f"O cliente {primeiroNome} assiste One Piece? (Y/N)")
     
     if assisteOnePiece:
@@ -946,6 +961,7 @@ def historicoCliente():
         else:
             for filme in resultado:
                 print(Filme.printaComoFilme2(filme[0], filme[3], filme[1], filme[2], filme[4]))
+                print()
 
             print()
 

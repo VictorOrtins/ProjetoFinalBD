@@ -10,6 +10,7 @@ from Entidades.cliente import *
 from Entidades.funcionario import *
 from Entidades.filme import *
 from Entidades.dvd import *
+from Entidades.ator import *
 #Por algum motivo, não consegui deixar isso num arquivo diferente. É o equivalente ao primeiro projeto
 #Vai ficar por aqui até a gente conseguir resolver
 
@@ -29,7 +30,7 @@ def menuCadastro(manipulaDaos):
         daoFilme: Objeto que implementa a interface FilmeDao
     """
 
-    listaFuncoes = [menuInserir, menuAlterar, pesquisarNome, pesquisarFaixa, pesquisarGenero, pesquisarNacionalidade, pesquisarQtdEstoque, menuRemover, menuSair]
+    listaFuncoes = [menuInserir, menuAlterar, pesquisarNome, pesquisarFaixa, pesquisarGenero, pesquisarNacionalidade, pesquisarQtdEstoque, menuRemover, inserirAtor, registrarParticipacao, menuSair]
 
     #Lista das funções que serão utilizadas. Todas elas tem assinatura parecidas para 
     #evitar o uso excessivo de ifs ou de switch cases
@@ -46,7 +47,9 @@ def menuCadastro(manipulaDaos):
         print(textoCor("6 - ", cor) + "Pesquisar por nacionalidade dos atores\n")
         print(textoCor("7 - ", cor) + "Pesquisar por quantidade em estoque\n")
         print(textoCor("8 - ", cor) + "Remover Filme\n")
-        print(textoCor("9 - ", cor) + "Voltar para o Menu da Loja\n")
+        print(textoCor("9 - ", cor) + "Inserir Ator\n")
+        print(textoCor("10 - ", cor) + "Registrar Participacao\n")
+        print(textoCor("11 - ", cor) + "Voltar para o Menu da Loja\n")
 
         try:
             opcao = int(input("Escolha uma opção: "))
@@ -398,8 +401,8 @@ def pesquisarQtdEstoque(manipulaDaos):
     while(menuPesquisar):
         titulo("PESQUISA DE FILMES", Texto.negrito())
 
-        input(f"{textoCor("Indique a faixa de Range de quantidade em estoque que você quer procurar o filme\n", Texto.amarelo())}Ela será no formato 'Preço entre X e Y\nPrimeiro perguntarei o X e depois o Y\nDigite qualquer tecla para continuar': ")
-        range1 = checaEntrada("\nDigite o X na expressão 'Quantidade em estoque entre X e Y: '", "Número inválido", lambda x: not(x.isdigit()))
+        input(f"{textoCor("Indique a faixa de Range de quantidade em estoque que você quer procurar o filme\n", Texto.amarelo())}Ela será no formato 'Estoque entre X e Y\nPrimeiro perguntarei o X e depois o Y\nDigite qualquer tecla para continuar: ")
+        range1 = checaEntrada("\nDigite o X na expressão 'Quantidade em estoque entre X e Y: ", "Número inválido", lambda x: not(x.isdigit()))
         range2 = checaEntrada(f"Digite o Y na expressão 'Quantidade em estoque entre {range1} e Y: ", "Número inválido", lambda x: not(x.isdigit()))
                               
         filmes = manipulaDaos.daoFilme.findByRangeQtdEstoque(range1, range2) #Tenta achar o filme pelo nome
@@ -549,6 +552,79 @@ def menuSair(manipulaDaos):
     
     loading("Saindo", Texto.amarelo())
     return True
+
+def inserirAtor(manipulaDaos):
+    menuInserir = True
+    while(menuInserir):
+        titulo("INSERÇÃO DE ATORES", Texto.negrito())
+
+        nomeAtor = checaEntrada("Nome do Ator a ser inserido: ", "Nome do Ator inválido!", lambda x: x == "")
+        #Pega o Nome do Filme. Checa também se esse nome é válido (É inválido se for vazio, apenas)
+
+       #Looping para pegar a Data de Lançamento 
+        expressao = lambda x: x == "" or x.isdigit() # Checagem de entrada válida para gênero, Nome do Estúdio
+        # e Nome do Diretor
+
+        paisNatal = checaEntrada(f"\nPais Natal do Ator {nomeAtor}: ", "Nome Inválido!", expressao)
+
+        #Cria um filme da classe filme a ser inserido. Como o ID é um atributo auto incremental,
+        #O filme é, no front, iniciado com -1. No método inserir, o ID é apenas desconsiderado
+        filme = Ator(-1, nomeAtor, paisNatal)
+        sucesso, idAtor = manipulaDaos.daoAtor.insere(filme) #Inserção
+
+        if sucesso: #Se foi possível inserir o filme
+            print(textoCor("\nAtor inserido com sucesso!", Texto.verde()))
+            print(f"\nO ID do Ator {nomeAtor} é: {idAtor}")
+        else: #Se a inserção foi impossível
+            print(textoCor("O Ator não pôde ser inserido no banco de dados!", Texto.vermelho()))
+
+        menuInserir = whileOutro("Deseja inserir outro Ator? (Y/N) ")
+
+        if menuInserir:
+            loading("Recarregando", Texto.ciano())
+
+    loading("Saindo", Texto.amarelo())
+
+def registrarParticipacao(manipulaDaos):
+    
+    menuInserir = True
+    while(menuInserir):
+        titulo("REGISTRAR PARTICIPAÇÃO", Texto.negrito())
+
+        nomeAtor = checaEntrada("Nome do Ator a ser registrado como parte de um filme: ", "Nome do Ator inválido!", lambda x: x == "")
+        #Pega o Nome do Filme. Checa também se esse nome é válido (É inválido se for vazio, apenas)
+        
+        resultado = manipulaDaos.daoAtor.getIdByNome(nomeAtor)
+        if resultado == []:
+            print(f"{textoCor("Ator inexistente em nosso banco", Texto.vermelho())}")
+            break
+
+        idAtor = resultado[0][0]
+       #Looping para pegar a Data de Lançamento 
+        expressao = lambda x: x == "" or x.isdigit() # Checagem de entrada válida para gênero, Nome do Estúdio
+        # e Nome do Diretor
+
+        nomeFilme = checaEntrada(f"\nFilme que o ator {nomeAtor} será registrado como parte: ", "Nome Inválido!", expressao)
+
+        resultado = manipulaDaos.daoFilme.getIdByNome(nomeFilme)
+        if resultado == []:
+            print(f"{textoCor("Filme inexistente em nosso banco", Texto.vermelho())}")
+            break
+
+        idFilme = resultado[0][0]
+
+        #Cria um filme da classe filme a ser inserido. Como o ID é um atributo auto incremental,
+        #O filme é, no front, iniciado com -1. No método inserir, o ID é apenas desconsiderado
+        manipulaDaos.daoGeral.insereParticipa(idAtor, idFilme) #Inserção
+
+        print(textoCor(f"{nomeAtor} colocado em {nomeFilme} com sucesso!", Texto.verde()))
+
+        menuInserir = whileOutro("Deseja inserir outra participação? (Y/N) ")
+
+        if menuInserir:
+            loading("Recarregando", Texto.ciano())
+
+    loading("Saindo", Texto.amarelo())
 
 
 

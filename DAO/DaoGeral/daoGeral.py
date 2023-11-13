@@ -63,6 +63,24 @@ class DaoGeralMySQL():
         resultado = self.cursor.fetchall()
 
         return resultado
+    
+    def pegaAluguelFuncionario(self, idFuncionario):
+        query = 'SELECT A.ID, PrimeiroNome, UltimoNome, ValorFinal FROM Aluga A  INNER JOIN CLIENTE C ON  A.IdCliente = C.ID WHERE IdFuncionario = %s'
+        value = (idFuncionario,)
+
+        self.cursor.execute(query, value)
+
+        resultado = self.cursor.fetchall()
+
+        return resultado
+    
+    def insereParticipa(self, idAtor, idFilme):
+        query = 'INSERT INTO Participa(IdFilme, IdAtor) VALUES (%s, %s)'
+        value = (idFilme, idAtor)
+
+        self.cursor.execute(query, value)
+
+        self.database.commit()
         
 
     def criaTabelaTemporaria(self, nome):
